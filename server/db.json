@@ -1,0 +1,220 @@
+{
+  "sensors": [
+    {
+      "id": 1,
+      "name": "SENSOR-01",
+      "location": "Planta Norte",
+      "type": "pH",
+      "currentValue": 7.2,
+      "unit": "pH",
+      "status": "Normal",
+      "lastUpdated": "2026-05-05T10:00:00Z",
+      "recommendedRange": "6.5 - 8.5",
+      "minAlert": 6,
+      "maxAlert": 8.7,
+      "history": [
+        7.1,
+        7.3,
+        7,
+        7.2,
+        7.4,
+        7.1,
+        7.2
+      ]
+    },
+    {
+      "id": 2,
+      "name": "SENSOR-02",
+      "location": "Planta Norte",
+      "type": "Turbidez",
+      "currentValue": 21.7,
+      "unit": "NTU",
+      "status": "Normal",
+      "lastUpdated": "2026-05-05T10:01:00Z",
+      "recommendedRange": "0 - 50",
+      "minAlert": 0,
+      "maxAlert": 60,
+      "history": [
+        20,
+        22,
+        19,
+        21,
+        23,
+        21,
+        21.7
+      ]
+    },
+    {
+      "id": 3,
+      "name": "SENSOR-03",
+      "location": "Tanque Sur",
+      "type": "Presión",
+      "currentValue": 3.8,
+      "unit": "bar",
+      "status": "Advertencia",
+      "lastUpdated": "2026-05-05T10:02:00Z",
+      "recommendedRange": "1.5 - 3.5",
+      "minAlert": 1,
+      "maxAlert": 4,
+      "history": [
+        2.5,
+        2.8,
+        3,
+        3.2,
+        3.5,
+        3.7,
+        3.8
+      ]
+    },
+    {
+      "id": 4,
+      "name": "SENSOR-04",
+      "location": "Tanque Sur",
+      "type": "Nivel",
+      "currentValue": 65,
+      "unit": "%",
+      "status": "Normal",
+      "lastUpdated": "2026-05-05T10:03:00Z",
+      "recommendedRange": "20 - 90",
+      "minAlert": 15,
+      "maxAlert": 95,
+      "history": [
+        70,
+        68,
+        66,
+        65,
+        64,
+        65,
+        65
+      ]
+    },
+    {
+      "id": 5,
+      "name": "SENSOR-05",
+      "location": "Red Principal",
+      "type": "Cloro",
+      "currentValue": 0.2,
+      "unit": "ppm",
+      "status": "Alerta",
+      "lastUpdated": "2026-05-05T10:04:00Z",
+      "recommendedRange": "0.5 - 2.0",
+      "minAlert": 0.3,
+      "maxAlert": 2.5,
+      "history": [
+        1.2,
+        0.9,
+        0.7,
+        0.5,
+        0.4,
+        0.3,
+        0.2
+      ]
+    },
+    {
+      "id": 6,
+      "name": "SENSOR-06",
+      "location": "Red Principal",
+      "type": "Flujo",
+      "currentValue": 80,
+      "unit": "%",
+      "status": "Normal",
+      "lastUpdated": "2026-05-05T10:05:00Z",
+      "recommendedRange": "50 - 100",
+      "minAlert": 30,
+      "maxAlert": 100,
+      "history": [
+        75,
+        78,
+        80,
+        82,
+        79,
+        80,
+        80
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Sensor-09",
+      "location": "Planta superior",
+      "type": "Presión",
+      "currentValue": 0,
+      "unit": "bar",
+      "status": "Normal",
+      "lastUpdated": "2026-05-11T17:18:34.151Z",
+      "recommendedRange": "0.5 - 10.5",
+      "minAlert": 0.5,
+      "maxAlert": 10.5,
+      "history": []
+    }
+  ],
+  "alerts": [
+    {
+      "id": 1,
+      "sensorId": 5,
+      "sensorName": "SENSOR-05",
+      "location": "Red Principal",
+      "type": "Cloro",
+      "severity": "Crítica",
+      "message": "El sensor SENSOR-05 (Cloro) superó el umbral mínimo permitido.",
+      "timestamp": "2026-05-05T09:55:00Z",
+      "status": "Activa",
+      "value": 0.2,
+      "threshold": 0.3
+    },
+    {
+      "id": 2,
+      "sensorId": 3,
+      "sensorName": "SENSOR-03",
+      "location": "Tanque Sur",
+      "type": "Presión",
+      "severity": "Advertencia",
+      "message": "El sensor SENSOR-03 (Presión) se encuentra cerca del límite.",
+      "timestamp": "2026-05-05T09:30:00Z",
+      "status": "Activa",
+      "value": 3.8,
+      "threshold": 4
+    },
+    {
+      "id": 3,
+      "sensorId": 6,
+      "sensorName": "SENSOR-06",
+      "location": "Red Principal",
+      "type": "Flujo",
+      "severity": "Advertencia",
+      "message": "Flujo reducido en la Red Principal detectado.",
+      "timestamp": "2026-05-05T08:45:00Z",
+      "status": "Resuelta",
+      "value": 80,
+      "threshold": 50
+    }
+  ],
+  "subscription": [
+    {
+      "id": 1,
+      "plan": "Operador Integral",
+      "tier": "Gestión Operativa",
+      "price": 1200,
+      "currency": "PEN",
+      "billingCycle": "monthly",
+      "status": "active",
+      "startDate": "2026-05-10",
+      "nextBillingDate": "2026-06-10",
+      "paymentMethod": "VISA **** 4242",
+      "features": [
+        "Monitoreo ilimitado de sensores",
+        "Alertas en tiempo real",
+        "Reportes e importación de datos",
+        "Respaldo automático de datos",
+        "Soporte técnico prioritario"
+      ],
+      "usage": {
+        "sensorsConnected": 46,
+        "sensorsLimit": 100,
+        "storageUsedGB": 24,
+        "storageLimitGB": 100,
+        "exports": 6,
+        "exportsLimit": 50
+      }
+    }
+  ]
+}
