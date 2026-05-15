@@ -1,6 +1,7 @@
 {
   "name": "aquanetix",
   "version": "0.0.0",
+  "description": "Aquanetix monitoring platform"
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
