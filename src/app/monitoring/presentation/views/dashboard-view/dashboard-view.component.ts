@@ -441,7 +441,277 @@ import { MonitoringService } from '../../../application/monitoring.service';
 
     </div>
   `,
+styles: [`
 
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .kpi-grid {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(auto-fit, minmax(260px, 1fr));
+
+      gap: 22px;
+
+      margin-bottom: 24px;
+    }
+
+    .kpi-card mat-card-content {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 18px;
+
+      padding: 28px !important;
+    }
+
+    .kpi-icon {
+
+      width: 64px;
+      height: 64px;
+
+      border-radius: 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kpi-icon mat-icon {
+      font-size: 30px;
+      width: 30px;
+      height: 30px;
+    }
+
+    .blue-bg {
+      background: #dbeafe;
+    }
+
+    .red-bg {
+      background: #fee2e2;
+    }
+
+    .green-bg {
+      background: #dcfce7;
+    }
+
+    .blue-icon {
+      color: #2563eb;
+    }
+
+    .red-icon {
+      color: #ff4d4f;
+    }
+
+    .green-icon {
+      color: #22c55e;
+    }
+
+    .kpi-label {
+
+      font-size: 13px;
+
+      color: #64748b;
+
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+
+      font-size: 2.3rem;
+
+      font-weight: 800;
+
+      line-height: 1;
+    }
+
+    .danger-text {
+      color: #ff4d4f;
+    }
+
+    .success-text {
+      color: #22c55e;
+    }
+
+    .dashboard-layout {
+
+      display: grid;
+
+      grid-template-columns: 1.4fr 1fr;
+
+      gap: 24px;
+
+      align-items: start;
+    }
+
+    .monitoring-card {
+      padding: 8px;
+    }
+
+    .section-header {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      padding: 18px 18px 0;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    table {
+
+      width: 100%;
+
+      margin-top: 20px;
+    }
+
+    th {
+
+      text-align: left;
+
+      padding: 16px;
+
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    td {
+
+      padding: 18px 16px;
+
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .right-column {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 20px;
+    }
+
+    .card-title {
+
+      margin: 0 0 20px;
+
+      font-size: 1.6rem;
+
+      font-weight: 700;
+    }
+
+    .system-status {
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 16px;
+    }
+
+    .system-status mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .status-title {
+
+      font-weight: 700;
+
+      margin-bottom: 6px;
+    }
+
+    .status-list {
+      margin-top: 12px;
+      padding-left: 18px;
+      line-height: 1.8;
+    }
+
+    .alerts-header {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      margin-bottom: 12px;
+    }
+
+    .alert-row {
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 14px;
+
+      padding: 16px;
+
+      border-radius: 16px;
+
+      margin-bottom: 12px;
+    }
+
+    .alert-title {
+
+      font-weight: 600;
+
+      margin-bottom: 4px;
+    }
+
+    .plan-box {
+
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 14px;
+    }
+
+    .plan-box mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .plan-name {
+
+      font-weight: 700;
+
+      margin-bottom: 6px;
+    }
+
+    .plan-price {
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 1024px) {
+
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  `]
+})
   
 export class DashboardViewComponent implements OnInit {
 
