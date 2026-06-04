@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { TranslateModule } from '@ngx-translate/core';
 
-import { MonitoringService } from '../../../application/monitoring.service';
+import { MonitoringService } from '../../../../monitoring/application/monitoring.service';
 
 @Component({
   selector: 'app-subscription-view',

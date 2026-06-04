@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { TranslateModule } from '@ngx-translate/core';
 
-import { MonitoringService } from '../../../application/monitoring.service';
+import { MonitoringService } from '../../../../monitoring/application/monitoring.service';
 
 @Component({
     selector: 'app-change-plan',

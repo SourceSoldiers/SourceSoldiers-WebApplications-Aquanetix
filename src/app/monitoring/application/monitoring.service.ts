@@ -3,11 +3,11 @@ import { HttpClient } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
 
-import { Sensor } from '../domain/model/sensor.entity';
+import { Sensor } from '../../devices/domain/model/sensor.entity';
 import { Alert } from '../domain/model/alert.entity';
-import { Subscription } from '../domain/model/subscription.entity';
+import { Subscription } from '../../subscriptions/domain/model/subscription.entity';
 
-import { SensorAssembler } from '../infrastructure/sensor.assembler';
+import { SensorAssembler } from '../../devices/infrastructure/sensor.assembler';
 import { AlertAssembler } from '../infrastructure/alert.assembler';
 
 import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint';

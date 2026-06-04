@@ -28,7 +28,7 @@ import {
   ɵɵdirectiveInject,
   ɵɵgetInheritedFactory,
   ɵɵinject
-} from "./chunk-EYRUOH3Y.js";
+} from "./chunk-KLQ7U5TF.js";
 import {
   __spreadValues
 } from "./chunk-WDMUDEB6.js";

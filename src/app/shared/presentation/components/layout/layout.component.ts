@@ -378,12 +378,12 @@ export class LayoutComponent {
   navItems = [
     {
       label: 'option.dashboard',
-      to: '/monitoring/dashboard',
+      to: '/dashboard',
       icon: 'dashboard'
     },
     {
       label: 'option.sensors',
-      to: '/monitoring/sensors',
+      to: '/devices',
       icon: 'sensors'
     },
     {
@@ -393,7 +393,7 @@ export class LayoutComponent {
     },
     {
       label: 'option.subscription',
-      to: '/monitoring/subscription',
+      to: '/subscription',
       icon: 'card_membership'
     }
   ];

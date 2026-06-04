@@ -11,7 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 
 import { TranslateModule } from '@ngx-translate/core';
 
-import { MonitoringService } from '../../../application/monitoring.service';
+import { MonitoringService } from '../../../../monitoring/application/monitoring.service';
 
 @Component({
   selector: 'app-dashboard-view',
