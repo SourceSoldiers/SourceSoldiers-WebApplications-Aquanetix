@@ -655,7 +655,7 @@ export class SensorFormComponent
   navigateBack(): void {
 
     this.router.navigate([
-      '/monitoring/sensors'
+      '/devices'
     ]);
   }
 }

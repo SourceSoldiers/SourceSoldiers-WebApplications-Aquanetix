@@ -55,7 +55,7 @@ interface ChartBar {
       <button
         mat-button
         color="primary"
-        (click)="router.navigate(['/monitoring/sensors'])"
+        (click)="router.navigate(['/devices'])"
         class="mb-3"
       >
         <mat-icon>arrow_back</mat-icon>

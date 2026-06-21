@@ -766,14 +766,14 @@ export class SensorListComponent implements OnInit {
   navigateToNew() {
 
     this.router.navigate([
-      '/monitoring/sensors/new'
+      '/devices/new'
     ]);
   }
 
   navigateToEdit(id: any) {
 
     this.router.navigate([
-      '/monitoring/sensors',
+      '/devices',
       id,
       'edit'
     ]);
@@ -782,7 +782,7 @@ export class SensorListComponent implements OnInit {
   navigateToDetail(id: any) {
 
     this.router.navigate([
-      '/monitoring/sensors',
+      '/devices',
       id
     ]);
   }
