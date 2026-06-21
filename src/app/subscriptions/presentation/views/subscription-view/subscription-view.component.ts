@@ -132,7 +132,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                 <button
                   mat-stroked-button
                   class="change-btn"
-                  routerLink="/monitoring/subscription/change-plan">
+                  routerLink="/subscription/change-plan">
 
                   <mat-icon>
                     autorenew

@@ -31,7 +31,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
         <button
           mat-icon-button
-          routerLink="/monitoring/subscription"
+          routerLink="/subscription"
           class="back-btn">
 
           <mat-icon>arrow_back</mat-icon>
@@ -719,7 +719,7 @@ export class ChangePlanComponent implements OnInit {
         setTimeout(() => {
 
             this.router.navigate([
-                '/monitoring/subscription'
+                '/subscription'
             ]);
 
         }, 400);
