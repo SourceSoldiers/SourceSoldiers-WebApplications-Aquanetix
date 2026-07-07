@@ -2,21 +2,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
 
 :root {
-  --primary: #41c4aa;
-  --primary-dark: #2ba58d;
+  --primary: #10B981;
+  --primary-dark: #059669;
+  --color-cobalt: #10B981;
+  --color-emerald: #10B981;
+  --color-forest: #064E3B;
+  --color-slate: #F1F5F9;
+  --color-text: #1E293B;
+  --color-muted: #64748B;
 
-  --success: #4CAF50;
-  --warning: #FF9800;
-  --danger: #FF4D4F;
+  --success: #10B981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 
-  --bg: #f4f7fb;
+  --bg: #F1F5F9;
   --surface: #ffffff;
 
-  --text: #1f2937;
-  --muted: #6b7280;
+  --text: #1E293B;
+  --muted: #64748B;
   --border: #e5e7eb;
 
-  --radius: 18px;
+  --radius: 12px;
 
   --shadow:
           0 2px 6px rgba(15, 23, 42, 0.04),
@@ -39,7 +45,7 @@ body {
   font-size: 15px;
   line-height: 1.5;
 
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -54,7 +60,7 @@ h5,
 h6 {
   font-family: 'Manrope', sans-serif;
 
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 
   color: #111827;
 
@@ -169,6 +175,11 @@ mat-icon {
   background: var(--primary) !important;
 }
 
+.mat-mdc-button.mat-primary,
+.mat-mdc-outlined-button.mat-primary {
+  color: var(--primary) !important;
+}
+
 /* FORM FIELDS */
 .mat-mdc-form-field {
   --mdc-outlined-text-field-container-shape: 14px;
@@ -258,8 +269,8 @@ table {
 }
 
 .chip-info {
-  background: #dbeafe;
-  color: #2563eb;
+  background: #d1fae5;
+  color: #047857;
 }
 
 /* ALERT BORDERS */

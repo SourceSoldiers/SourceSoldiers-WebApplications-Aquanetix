@@ -173,7 +173,7 @@ interface ChartBar {
                   <div class="legend-item">
     <span
         class="legend-color"
-        style="background:#007BFF;"
+        style="background:#10B981;"
     ></span>
                     {{ 'sensorDetail.normal' | translate }}
                   </div>
@@ -277,7 +277,7 @@ interface ChartBar {
     <span
         [style.color]="
         bar.isLast
-          ? '#007BFF'
+          ? '#10B981'
           : '#94a3b8'
       "
 
@@ -449,7 +449,7 @@ interface ChartBar {
                     {{ 'sensorDetail.minAlert' | translate }}
                   </span>
 
-                  <span style="color:#3b82f6;">
+                  <span style="color:#10B981;">
                     {{ sensor()!.minAlert }}
                     {{ sensor()!.unit }}
                   </span>
@@ -615,7 +615,7 @@ interface ChartBar {
   .current-value{
     font-size:4rem;
     font-weight:700;
-    color:#007BFF;
+    color:#10B981;
     line-height:1;
   }
 
@@ -713,7 +713,7 @@ interface ChartBar {
   }
 
   .min-line{
-    background:#3b82f6;
+    background:#10B981;
   }
 
   .line-label{
@@ -735,7 +735,7 @@ interface ChartBar {
   }
 
   .min-label{
-    color:#3b82f6;
+    color:#10B981;
   }
 
   .legend{
@@ -960,7 +960,7 @@ export class SensorDetailComponent {
 
     this.chartBars = vals.map((v, i) => {
 
-      let color = '#007BFF';
+      let color = '#10B981';
 
 
       if (

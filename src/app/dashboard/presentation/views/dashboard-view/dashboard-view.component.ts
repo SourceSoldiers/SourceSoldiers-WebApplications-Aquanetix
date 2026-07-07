@@ -166,6 +166,95 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
       </div>
 
+      <!-- QUALITY FINDINGS -->
+
+      <mat-card class="quality-card">
+
+        <mat-card-content>
+
+          <div class="section-header compact">
+
+            <div>
+
+              <h2>
+                {{ 'dashboard.recentQualityFindings' | translate }}
+              </h2>
+
+              <p class="text-muted">
+                {{ 'dashboard.qualityFindingsSubtitle' | translate }}
+              </p>
+
+            </div>
+
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+            >
+              <mat-icon>add</mat-icon>
+              {{ 'dashboard.registerQualityFinding' | translate }}
+            </button>
+          </div>
+
+          <div class="quality-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ 'dashboard.sourceDevice' | translate }}</th>
+                  <th>{{ 'dashboard.evaluatedParameter' | translate }}</th>
+                  <th>{{ 'dashboard.severity' | translate }}</th>
+                  <th>{{ 'dashboard.reviewStatus' | translate }}</th>
+                  <th>{{ 'dashboard.contaminationRisk' | translate }}</th>
+                  <th>{{ 'dashboard.createdAt' | translate }}</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let finding of qualityFindings">
+                  <td>
+                    <strong>{{ finding.sourceDevice }}</strong>
+                  </td>
+                  <td>{{ finding.parameter }}</td>
+                  <td>
+                    <span
+                      class="status-chip"
+                      [ngClass]="getSeverityChipClass(finding.severityScore)"
+                    >
+                      {{ finding.severityScore.toFixed(1) }} / 10
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="status-chip"
+                      [ngClass]="getReviewStatusChipClass(finding.reviewStatus)"
+                    >
+                      {{ finding.reviewStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="status-chip"
+                      [ngClass]="finding.riskDetected ? 'chip-critical' : 'chip-normal'"
+                    >
+                      {{
+                        (
+                          finding.riskDetected
+                            ? 'dashboard.riskDetected'
+                            : 'dashboard.riskNotFlagged'
+                        ) | translate
+                      }}
+                    </span>
+                  </td>
+                  <td>{{ finding.createdAt }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </mat-card-content>
+
+      </mat-card>
+
       <!-- MAIN GRID -->
 
       <div class="dashboard-layout">
@@ -495,7 +584,7 @@ styles: [`
     }
 
     .blue-bg {
-      background: #dbeafe;
+      background: #d1fae5;
     }
 
     .red-bg {
@@ -507,7 +596,7 @@ styles: [`
     }
 
     .blue-icon {
-      color: #2563eb;
+      color: #10B981;
     }
 
     .red-icon {
@@ -553,6 +642,34 @@ styles: [`
       gap: 24px;
 
       align-items: start;
+    }
+
+    .quality-card {
+      margin-bottom: 24px;
+    }
+
+    .section-header.compact {
+      padding: 0;
+      margin-bottom: 12px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .section-header.compact h2 {
+      font-size: 1.6rem;
+    }
+
+    .section-header.compact p {
+      margin-top: 4px;
+    }
+
+    .quality-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .quality-table-wrapper table {
+      min-width: 820px;
+      margin-top: 0;
     }
 
     .monitoring-card {
@@ -715,6 +832,33 @@ styles: [`
   
 export class DashboardViewComponent implements OnInit {
 
+  qualityFindings = [
+    {
+      sourceDevice: 'SENSOR-03 #3',
+      parameter: 'Chlorine',
+      severityScore: 8.7,
+      reviewStatus: 'Confirmed',
+      riskDetected: true,
+      createdAt: '07/07/2026 09:40'
+    },
+    {
+      sourceDevice: 'SENSOR-02 #2',
+      parameter: 'Turbidity',
+      severityScore: 6.2,
+      reviewStatus: 'Evaluated',
+      riskDetected: false,
+      createdAt: '07/07/2026 08:15'
+    },
+    {
+      sourceDevice: 'SENSOR-01 #1',
+      parameter: 'PH',
+      severityScore: 3.4,
+      reviewStatus: 'Dismissed',
+      riskDetected: false,
+      createdAt: '06/07/2026 18:05'
+    }
+  ];
+
   constructor(
       public store: MonitoringService,
       public router: Router
@@ -746,5 +890,31 @@ export class DashboardViewComponent implements OnInit {
     }
 
     return 'chip-alert';
+  }
+
+  getSeverityChipClass(score: number): string {
+
+    if (score >= 8) {
+      return 'chip-critical';
+    }
+
+    if (score >= 5) {
+      return 'chip-warning';
+    }
+
+    return 'chip-normal';
+  }
+
+  getReviewStatusChipClass(status: string): string {
+
+    if (status === 'Confirmed') {
+      return 'chip-critical';
+    }
+
+    if (status === 'Dismissed') {
+      return 'chip-normal';
+    }
+
+    return 'chip-info';
   }
 }

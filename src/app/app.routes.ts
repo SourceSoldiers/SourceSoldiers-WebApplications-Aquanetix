@@ -31,6 +31,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'service-design',
+    loadChildren: () =>
+        import('./service-design/service-design.routes')
+            .then(m => m.serviceDesignRoutes)
+  },
+
+  {
     path: '',
     redirectTo: '/dashboard',
     pathMatch: 'full'

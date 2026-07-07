@@ -428,7 +428,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
 
     .plan-card {
-      border-top: 4px solid #1677ff;
+      border-top: 4px solid #10B981;
     }
 
     .plan-card mat-card-content {
@@ -445,7 +445,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
       background: rgba(22, 119, 255, 0.12);
 
-      color: #1677ff;
+      color: #10B981;
 
       border-radius: 12px;
 
@@ -476,7 +476,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
       border-radius: 14px;
 
-      background: rgba(22, 119, 255, 0.08);
+      background: rgba(16, 185, 129, 0.08);
 
       display: flex;
 
@@ -486,7 +486,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
 
     .plan-icon mat-icon {
-      color: #1677ff;
+      color: #10B981;
       font-size: 28px;
       width: 28px;
       height: 28px;
@@ -517,14 +517,14 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
     .currency {
       font-size: 1.7rem;
-      color: #1677ff;
+      color: #10B981;
       font-weight: 700;
     }
 
     .amount {
       font-size: 3rem;
       line-height: 1;
-      color: #1677ff;
+      color: #10B981;
       font-weight: 800;
     }
 
@@ -573,8 +573,8 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
 
     .change-btn {
-      border-color: #1677ff !important;
-      color: #1677ff !important;
+      border-color: #10B981 !important;
+      color: #10B981 !important;
       height: 42px;
       border-radius: 12px !important;
       font-weight: 700;
@@ -640,7 +640,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
 
     .blue {
-      background: #1677ff;
+      background: #10B981;
     }
 
     .green {

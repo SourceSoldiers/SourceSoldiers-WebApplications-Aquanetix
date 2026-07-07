@@ -5,7 +5,9 @@
     "sensors": "Sensors",
     "alerts": "Alerts",
     "subscription": "Subscription",
-    "profile": "Profile"
+    "profile": "Profile",
+    "waterBatches": "Water batches",
+    "cancel": "Cancel"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -32,7 +34,18 @@
     "energyConsumption": "Energy consumption: 1,245 kWh",
     "viewFullMap": "View full map",
     "verTodos": "View all",
-    "requiredAttendance": "Required attention"
+    "requiredAttendance": "Required attention",
+    "recentQualityFindings": "Recent quality findings",
+    "qualityFindingsSubtitle": "Latest water-quality anomalies and contamination risk evaluations.",
+    "registerQualityFinding": "Register finding",
+    "sourceDevice": "Source device",
+    "evaluatedParameter": "Evaluated parameter",
+    "severity": "Severity",
+    "reviewStatus": "Review status",
+    "contaminationRisk": "Contamination risk",
+    "createdAt": "Created at",
+    "riskDetected": "Risk detected",
+    "riskNotFlagged": "Not flagged"
   },
   "sensors": {
     "title": "Devices",
@@ -173,6 +186,42 @@
     "annualSavings": "Annual savings",
     "confirmButton": "Confirm change",
     "cancel": "Cancel"
+  },
+  "waterBatches": {
+    "title": "Water batches",
+    "subtitle": "Manage certified deliveries, destinations and treated-water volume.",
+    "addBatch": "Add batch",
+    "searchPlaceholder": "Search batch, source or destination...",
+    "certificationCode": "Certification code",
+    "destination": "Destination",
+    "volume": "Volume",
+    "source": "Source",
+    "delivery": "Delivery",
+    "status": "Status",
+    "actions": "Actions",
+    "empty": "No batches registered.",
+    "newTitle": "New water batch",
+    "editTitle": "Edit water batch",
+    "formSubtitle": "Register the batch operational information.",
+    "save": "Save batch",
+    "sourceOther": "Other source",
+    "sourceOtherPlaceholder": "Write the source",
+    "totalVolume": "Total volume",
+    "pendingDeliveries": "Pending deliveries"
+  },
+  "destinations": {
+    "title": "Destinations",
+    "subtitle": "Manage delivery sectors and locations.",
+    "manage": "Manage destinations",
+    "addTitle": "Add destination",
+    "name": "Name",
+    "address": "Address",
+    "description": "Description",
+    "addressPlaceholder": "Address or reference",
+    "descriptionPlaceholder": "Brief description",
+    "add": "Add destination",
+    "actions": "Actions",
+    "empty": "No destinations registered."
   },
   "page-not-found": {
     "title": "Page not found",

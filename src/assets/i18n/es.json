@@ -5,7 +5,9 @@
     "sensors": "Sensores",
     "alerts": "Alertas",
     "subscription": "Suscripción",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "waterBatches": "Lotes de agua",
+    "cancel": "Cancelar"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -32,7 +34,18 @@
     "energyConsumption": "Consumo energético: 1,245 kWh",
     "viewFullMap": "Ver mapa completo",
     "verTodos": "Ver todos",
-    "requiredAttendance": "Atención requerida"
+    "requiredAttendance": "Atención requerida",
+    "recentQualityFindings": "Hallazgos de calidad recientes",
+    "qualityFindingsSubtitle": "Ultimas anomalias de calidad de agua y evaluaciones de riesgo de contaminacion.",
+    "registerQualityFinding": "Registrar hallazgo",
+    "sourceDevice": "Dispositivo origen",
+    "evaluatedParameter": "Parametro evaluado",
+    "severity": "Severidad",
+    "reviewStatus": "Estado de revision",
+    "contaminationRisk": "Riesgo de contaminacion",
+    "createdAt": "Creado",
+    "riskDetected": "Riesgo detectado",
+    "riskNotFlagged": "Sin riesgo marcado"
   },
   "sensors": {
     "title": "Dispositivos",
@@ -173,6 +186,42 @@
     "annualSavings": "Ahorro anual",
     "confirmButton": "Confirmar cambio",
     "cancel": "Cancelar"
+  },
+  "waterBatches": {
+    "title": "Lotes de agua",
+    "subtitle": "Gestiona entregas certificadas, destinos y volumen de agua tratada.",
+    "addBatch": "Agregar lote",
+    "searchPlaceholder": "Buscar lote, fuente o destino...",
+    "certificationCode": "Codigo de certificacion",
+    "destination": "Destino",
+    "volume": "Volumen",
+    "source": "Fuente",
+    "delivery": "Entrega",
+    "status": "Estado",
+    "actions": "Acciones",
+    "empty": "No hay lotes registrados.",
+    "newTitle": "Nuevo lote de agua",
+    "editTitle": "Editar lote de agua",
+    "formSubtitle": "Registra la informacion operacional del lote.",
+    "save": "Guardar lote",
+    "sourceOther": "Otra fuente",
+    "sourceOtherPlaceholder": "Escribe la fuente",
+    "totalVolume": "Volumen total",
+    "pendingDeliveries": "Entregas pendientes"
+  },
+  "destinations": {
+    "title": "Destinos",
+    "subtitle": "Administra los sectores y puntos de entrega.",
+    "manage": "Gestionar destinos",
+    "addTitle": "Agregar destino",
+    "name": "Nombre",
+    "address": "Direccion",
+    "description": "Descripcion",
+    "addressPlaceholder": "Direccion o referencia",
+    "descriptionPlaceholder": "Descripcion breve",
+    "add": "Agregar destino",
+    "actions": "Acciones",
+    "empty": "No hay destinos registrados."
   },
   "page-not-found": {
     "title": "Página no encontrada",

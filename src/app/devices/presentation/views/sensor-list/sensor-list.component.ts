@@ -502,11 +502,11 @@ import { Sensor } from '../../../domain/model/sensor.entity';
       display:flex;
       align-items:center;
       justify-content:center;
-      background:#dbeafe;
+      background:#d1fae5;
     }
 
     .sensor-avatar mat-icon{
-      color:#2563eb;
+      color:#10B981;
     }
 
     .sensor-title{

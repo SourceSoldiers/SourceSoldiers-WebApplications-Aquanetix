@@ -352,7 +352,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
 
     .highlight {
-      border: 2px solid #1677ff !important;
+      border: 2px solid #10B981 !important;
       padding-top: 34px;
     }
 
@@ -366,7 +366,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
       transform: translateX(-50%);
 
-      background: #1677ff;
+      background: #10B981;
 
       color: white;
 
@@ -385,7 +385,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
       z-index: 100;
 
       box-shadow:
-        0 4px 12px rgba(22, 119, 255, 0.25);
+        0 4px 12px rgba(16, 185, 129, 0.25);
     }
 
     h2 {

@@ -559,13 +559,13 @@ import { Alert } from '../../../domain/model/alert.entity';
       align-items: center;
       justify-content: center;
 
-      background: #dbeafe;
+      background: #d1fae5;
 
       flex-shrink: 0;
     }
 
     .info-icon mat-icon {
-      color: #2563eb;
+      color: #10B981;
     }
 
     .info-title {

@@ -12,6 +12,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { MonitoringService } from '../../../../monitoring/application/monitoring.service';
 import { Sensor } from '../../../domain/model/sensor.entity';
+import { ServiceDesignService } from '../../../../service-design/application/service-design.service';
 
 @Component({
   selector: 'app-sensor-form',
@@ -83,12 +84,29 @@ import { Sensor } from '../../../domain/model/sensor.entity';
               {{ 'sensors.locationLabel' | translate }} *
             </mat-label>
 
-            <input
-              matInput
+            <mat-select
               [(ngModel)]="form.location"
-              placeholder="Ej: Planta Norte"
               required
             >
+
+              <mat-option
+                *ngFor="
+                  let destination of serviceDesign.destinations()
+                "
+                [value]="destination.name"
+              >
+
+                {{ destination.name }}
+
+              </mat-option>
+
+            </mat-select>
+
+            <mat-hint
+              *ngIf="serviceDesign.destinations().length === 0"
+            >
+              {{ 'destinations.empty' | translate }}
+            </mat-hint>
 
           </mat-form-field>
 
@@ -464,6 +482,7 @@ export class SensorFormComponent
 
   constructor(
       public store: MonitoringService,
+      public serviceDesign: ServiceDesignService,
       private route: ActivatedRoute,
       public router: Router
   ) {}

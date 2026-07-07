@@ -95,9 +95,7 @@ import {
           <div class="brand-wrapper">
 
             <div class="brand-logo">
-              <mat-icon class="material-symbols-rounded">
-                water_drop
-              </mat-icon>
+              <img src="assets/Aquanetix_Logo.png" alt="Aquanetix">
             </div>
 
             <span class="brand-name">
@@ -188,7 +186,7 @@ import {
 
       padding: 0 36px;
 
-      background: #41c4aa !important;
+      background: #10B981 !important;
 
       border-bottom:
         1px solid rgba(255,255,255,0.08);
@@ -204,21 +202,20 @@ import {
     }
 
     .brand-logo {
-      width: 42px;
       height: 42px;
-
-      border-radius: 12px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      background: rgba(255,255,255,0.16);
+      background: transparent;
     }
 
-    .brand-logo mat-icon {
-      color: white;
-      font-size: 22px;
+    .brand-logo img {
+      display: block;
+      width: auto;
+      height: 36px;
+      object-fit: contain;
     }
 
     .brand-name {
@@ -227,7 +224,7 @@ import {
       font-size: 1.35rem;
       font-weight: 700;
 
-      letter-spacing: -0.03em;
+      letter-spacing: 0.5px;
 
       color: white;
     }
@@ -328,7 +325,7 @@ import {
     .app-footer {
       padding: 18px;
 
-      background: #0f172a;
+      background: #064E3B;
 
       text-align: center;
 
@@ -373,7 +370,7 @@ export class LayoutComponent {
 
   drawerOpen = false;
 
-  currentLang = 'es';
+  currentLang = 'en';
 
   navItems = [
     {
@@ -392,6 +389,11 @@ export class LayoutComponent {
       icon: 'notifications'
     },
     {
+      label: 'option.waterBatches',
+      to: '/service-design',
+      icon: 'local_shipping'
+    },
+    {
       label: 'option.subscription',
       to: '/subscription',
       icon: 'card_membership'
@@ -402,9 +404,9 @@ export class LayoutComponent {
       private translate: TranslateService
   ) {
 
-    this.translate.setDefaultLang('es');
+    this.translate.setDefaultLang('en');
 
-    this.translate.use('es');
+    this.translate.use('en');
   }
 
   switchLang(lang: string): void {
