@@ -44,53 +44,10 @@ import { AuthenticationService } from '../../../../iam/application/authenticatio
   template: `
     <mat-sidenav-container class="sidenav-container">
 
-      <!-- MOBILE SIDENAV -->
-      <mat-sidenav
-        #drawer
-        mode="over"
-        [opened]="drawerOpen"
-      >
-
-        <mat-nav-list *ngIf="auth.isAuthenticated()">
-
-          <a
-            mat-list-item
-            *ngFor="let item of navItems"
-            [routerLink]="item.to"
-            routerLinkActive="active-link"
-            (click)="drawerOpen = false"
-          >
-
-            <mat-icon class="material-symbols-rounded" matListItemIcon>
-              {{ item.icon }}
-            </mat-icon>
-
-            <span>
-              {{ item.label | translate }}
-            </span>
-
-          </a>
-
-        </mat-nav-list>
-
-      </mat-sidenav>
-
       <mat-sidenav-content>
 
         <!-- TOP NAVBAR -->
         <mat-toolbar class="app-toolbar">
-
-          <button
-            mat-icon-button
-            class="menu-btn"
-            (click)="drawerOpen = !drawerOpen"
-          >
-
-            <mat-icon class="material-symbols-rounded">
-              menu
-            </mat-icon>
-
-          </button>
 
           <!-- BRAND -->
           <div class="brand-wrapper">
@@ -371,30 +328,30 @@ import { AuthenticationService } from '../../../../iam/application/authenticatio
       margin: 0;
     }
 
-    .menu-btn {
-      display: none;
-
-      color: white;
-
-      margin-right: 8px;
-    }
-
     @media (max-width: 1350px) {
 
       .desktop-nav {
-        display: none;
+        order: 10;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 0 0 10px;
       }
 
       .welcome-text {
         display: none;
       }
 
-      .menu-btn {
-        display: inline-flex;
+      .app-toolbar {
+        height: auto;
+        min-height: 78px;
+        flex-wrap: wrap;
+        padding: 0 20px;
       }
 
-      .app-toolbar {
-        padding: 0 20px;
+      .nav-link {
+        height: 38px;
+        padding: 0 12px !important;
       }
 
       .page-container {
@@ -433,8 +390,6 @@ import { AuthenticationService } from '../../../../iam/application/authenticatio
   `]
 })
 export class LayoutComponent {
-
-  drawerOpen = false;
 
   currentLang = 'en';
 

@@ -106,10 +106,18 @@ export class MonitoringService {
 
   fetchSensors(): void {
     this.sensorsLoaded.set(false);
+    const ownerId = this.auth.currentUser()?.id;
+    if (!ownerId) {
+      this.sensors.set([]);
+      this.sensorsLoaded.set(true);
+      return;
+    }
+
     this.http.get<DeviceResource[]>(`${environment.apiUrl}/devices`).pipe(
       switchMap(devices => {
-        if (!devices.length) return of([] as Sensor[]);
-        return forkJoin(devices.map(device =>
+        const ownedDevices = devices.filter(device => device.ownerId === ownerId);
+        if (!ownedDevices.length) return of([] as Sensor[]);
+        return forkJoin(ownedDevices.map(device =>
           this.http.get<ThresholdResource[]>(`${environment.apiUrl}/devices/${device.id}/thresholds`).pipe(
             map(thresholds => this.toSensor(device, thresholds.at(-1))),
             catchError(() => of(this.toSensor(device)))
@@ -194,9 +202,28 @@ export class MonitoringService {
 
   fetchAlerts(): void {
     this.alertsLoaded.set(false);
-    this.http.get<AlertResource[]>(`${environment.apiUrl}/alerts`).subscribe({
-      next: resources => {
-        this.alerts.set(resources.map(resource => this.toAlert(resource)));
+    const ownerId = this.auth.currentUser()?.id;
+    if (!ownerId) {
+      this.alerts.set([]);
+      this.alertsLoaded.set(true);
+      return;
+    }
+
+    forkJoin({
+      devices: this.http.get<DeviceResource[]>(`${environment.apiUrl}/devices`),
+      alerts: this.http.get<AlertResource[]>(`${environment.apiUrl}/alerts`)
+    }).subscribe({
+      next: ({ devices, alerts }) => {
+        const ownedDeviceIds = new Set(
+          devices
+            .filter(device => device.ownerId === ownerId)
+            .map(device => device.id)
+        );
+        this.alerts.set(
+          alerts
+            .filter(alert => ownedDeviceIds.has(alert.deviceId))
+            .map(resource => this.toAlert(resource))
+        );
         this.alertsLoaded.set(true);
       },
       error: error => this.recordError(error, this.alertsLoaded)

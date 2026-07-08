@@ -1,6 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthUser } from '../domain/auth-user';
@@ -15,8 +14,7 @@ export class AuthenticationService {
   readonly isAuthenticated = computed(() => Boolean(this.currentUserSignal()?.token));
 
   constructor(
-    private readonly http: HttpClient,
-    private readonly router: Router
+    private readonly http: HttpClient
   ) {}
 
   signIn(email: string, password: string): Observable<AuthUser> {
@@ -34,7 +32,7 @@ export class AuthenticationService {
   signOut(): void {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     this.currentUserSignal.set(null);
-    void this.router.navigate(['/iam/sign-in']);
+    window.location.assign('/iam/sign-in');
   }
 
   token(): string | null {

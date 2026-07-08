@@ -944,7 +944,15 @@ export class DashboardViewComponent implements OnInit {
   };
 
   get qualityFindings() {
-    return this.qualityService.analyses().map(analysis => {
+    const ownedDeviceIds = new Set(
+      this.store.sensors()
+        .map(sensor => sensor.id)
+        .filter((id): id is number => id !== null)
+    );
+
+    return this.qualityService.analyses()
+      .filter(analysis => ownedDeviceIds.has(analysis.sensorSourceId))
+      .map(analysis => {
       const sensor = this.store.getSensorById(analysis.sensorSourceId);
       return {
         sourceDevice: sensor?.name ?? `#${analysis.sensorSourceId}`,
@@ -953,8 +961,8 @@ export class DashboardViewComponent implements OnInit {
         reviewStatus: analysis.anomalyStatus,
         riskDetected: analysis.hasContaminationPeakPrediction,
         createdAt: new Date(analysis.createdAt).toLocaleString()
-      };
-    });
+        };
+      });
   }
 
   get totalQualityFindings(): number {
