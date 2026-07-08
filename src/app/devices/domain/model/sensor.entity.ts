@@ -2,6 +2,7 @@ export class Sensor {
   id: number | null;
   name: string;
   location: string;
+  destinationId: number | null;
   type: string;
   currentValue: number;
   unit: string;
@@ -16,6 +17,7 @@ export class Sensor {
     this.id              = params.id              ?? null;
     this.name            = params.name            ?? '';
     this.location        = params.location        ?? '';
+    this.destinationId   = params.destinationId   ?? null;
     this.type            = params.type            ?? '';
     this.currentValue    = params.currentValue    ?? 0;
     this.unit            = params.unit            ?? '';

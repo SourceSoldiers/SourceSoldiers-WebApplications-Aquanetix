@@ -42,7 +42,7 @@ import { ServiceDesignService } from '../../../application/service-design.servic
           <h2>{{ 'destinations.addTitle' | translate }}</h2>
 
           <div *ngIf="message" class="message" [class.error]="messageIsError">
-            {{ message }}
+            {{ message | translate }}
           </div>
 
           <div class="form-grid">
@@ -188,7 +188,7 @@ export class DestinationManageComponent {
     this.message = '';
 
     if (!this.form.name.trim()) {
-      this.message = 'Ingresa un nombre de destino.';
+      this.message = 'destinations.nameRequired';
       this.messageIsError = true;
       return;
     }
@@ -200,15 +200,15 @@ export class DestinationManageComponent {
     });
 
     this.form = { name: '', address: '', description: '' };
-    this.message = 'Destino agregado correctamente.';
+    this.message = 'destinations.added';
     this.messageIsError = false;
   }
 
   deleteDestination(id: number): void {
     const deleted = this.service.deleteDestination(id);
     this.message = deleted
-      ? 'Destino eliminado correctamente.'
-      : 'No se puede eliminar un destino usado por un lote.';
+      ? 'destinations.deleted'
+      : 'destinations.inUse';
     this.messageIsError = !deleted;
   }
 }

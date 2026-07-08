@@ -72,17 +72,17 @@ import { Alert } from '../../../domain/model/alert.entity';
                     <div class="flex gap-2 items-center mb-2">
                       <span class="status-chip" [ngClass]="alert.severity === 'Crítica' ? 'chip-critical' : 'chip-warning'"
                             style="opacity:0.7;">
-                        {{ alert.severity }}
+                        {{ store.alertSeverityLabel(alert) }}
                       </span>
-                      <span class="status-chip chip-resolved">Resuelta</span>
+                      <span class="status-chip chip-resolved">{{ 'alerts.resolved' | translate }}</span>
                     </div>
-                    <p class="text-sm font-semibold" style="margin:0; color:#475569;">{{ alert.message }}</p>
+                    <p class="text-sm font-semibold" style="margin:0; color:#475569;">{{ store.alertMessage(alert) }}</p>
                     <p class="text-sm text-muted mt-1" style="margin:0;">
                       {{ alert.sensorName }} &nbsp;·&nbsp; {{ alert.location }} &nbsp;·&nbsp; {{ alert.type }}
                     </p>
                   </div>
                   <div style="text-align:right; min-width:120px; flex-shrink:0;">
-                    <p class="text-sm text-muted" style="margin:0;">{{ formatDate(alert.timestamp) }}</p>
+                    <p class="text-sm text-muted" style="margin:0;">{{ store.formatDateTime(alert.timestamp) }}</p>
                   </div>
                 </div>
               </mat-card-content>

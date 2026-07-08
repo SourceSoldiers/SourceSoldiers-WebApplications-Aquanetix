@@ -4,6 +4,7 @@
 :root {
   --primary: #10B981;
   --primary-dark: #059669;
+  --primary-soft: #d1fae5;
   --color-cobalt: #10B981;
   --color-emerald: #10B981;
   --color-forest: #064E3B;
@@ -27,6 +28,14 @@
   --shadow:
           0 2px 6px rgba(15, 23, 42, 0.04),
           0 10px 30px rgba(15, 23, 42, 0.06);
+
+  --mdc-theme-primary: #10B981;
+  --mat-option-selected-state-label-text-color: #047857;
+  --mat-select-focused-arrow-color: #10B981;
+  --mdc-outlined-text-field-focus-outline-color: #10B981;
+  --mdc-outlined-text-field-focus-label-text-color: #047857;
+  --mat-minimal-pseudo-checkbox-selected-checkmark-color: #10B981;
+  --mdc-circular-progress-active-indicator-color: #10B981;
 }
 
 /* RESET */
@@ -173,11 +182,21 @@ mat-icon {
 .mat-mdc-fab.mat-primary,
 .mat-mdc-mini-fab.mat-primary {
   background: var(--primary) !important;
+  color: white !important;
 }
 
 .mat-mdc-button.mat-primary,
 .mat-mdc-outlined-button.mat-primary {
   color: var(--primary) !important;
+}
+
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: var(--primary);
+}
+
+.mat-primary {
+  --mat-full-pseudo-checkbox-selected-icon-color: var(--primary);
+  --mat-minimal-pseudo-checkbox-selected-checkmark-color: var(--primary);
 }
 
 /* FORM FIELDS */

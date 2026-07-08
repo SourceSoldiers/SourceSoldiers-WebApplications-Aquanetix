@@ -1,560 +1,543 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
+import { computed, Injectable, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../environments/environment';
-
+import { AuthenticationService } from '../../iam/application/authentication.service';
 import { Sensor } from '../../devices/domain/model/sensor.entity';
 import { Alert } from '../domain/model/alert.entity';
 import { Subscription } from '../../subscriptions/domain/model/subscription.entity';
 
-import { SensorAssembler } from '../../devices/infrastructure/sensor.assembler';
-import { AlertAssembler } from '../infrastructure/alert.assembler';
+interface DeviceResource {
+  id: number;
+  ownerId: number;
+  serialNumber: string;
+  deviceType: string;
+  currentStatus: string;
+  lastTelemetrySync: string;
+  name: string;
+  location: string;
+  unit: string;
+  currentValue: number;
+  destinationId: number | null;
+}
 
-import { BaseEndpoint } from '../../shared/infrastructure/base-endpoint';
+interface ThresholdResource {
+  id: number;
+  deviceId: number;
+  minValue: number;
+  maxValue: number;
+  unit: string;
+  alertLevel: string;
+}
 
-const MOCK_SENSORS: Sensor[] = [
-  new Sensor({
-    id: 1,
-    name: 'SENSOR-01',
-    location: 'Planta Norte',
-    type: 'pH',
-    currentValue: 7.2,
-    unit: 'pH',
-    status: 'Normal',
-    lastUpdated: new Date().toISOString(),
-    recommendedRange: '6.5 - 8.5 pH',
-    minAlert: 6.5,
-    maxAlert: 8.5,
-    history: [7.0, 7.1, 7.3, 7.2, 7.4, 7.1, 7.2]
-  }),
-  new Sensor({
-    id: 2,
-    name: 'SENSOR-02',
-    location: 'Reservorio Central',
-    type: 'Turbidez',
-    currentValue: 5.8,
-    unit: 'NTU',
-    status: 'Advertencia',
-    lastUpdated: new Date().toISOString(),
-    recommendedRange: '0 - 5 NTU',
-    minAlert: 0,
-    maxAlert: 5,
-    history: [3.2, 4.1, 4.8, 5.1, 5.4, 5.6, 5.8]
-  }),
-  new Sensor({
-    id: 3,
-    name: 'SENSOR-03',
-    location: 'Sector Industrial',
-    type: 'Cloro',
-    currentValue: 0.1,
-    unit: 'ppm',
-    status: 'Alerta',
-    lastUpdated: new Date().toISOString(),
-    recommendedRange: '0.2 - 1 ppm',
-    minAlert: 0.2,
-    maxAlert: 1,
-    history: [0.8, 0.6, 0.5, 0.3, 0.2, 0.14, 0.1]
-  }),
-  new Sensor({
-    id: 4,
-    name: 'SENSOR-04',
-    location: 'Planta Sur',
-    type: 'Temperatura',
-    currentValue: 24.6,
-    unit: 'C',
-    status: 'Normal',
-    lastUpdated: new Date().toISOString(),
-    recommendedRange: '18 - 28 C',
-    minAlert: 18,
-    maxAlert: 28,
-    history: [23.7, 24.0, 24.2, 24.1, 24.3, 24.5, 24.6]
-  })
-];
+interface AlertResource {
+  id: number;
+  deviceId: number;
+  deviceName: string;
+  location: string;
+  type: string;
+  severity: string;
+  message: string;
+  timestamp: string;
+  status: string;
+  value: number;
+  threshold: number;
+}
 
-const MOCK_ALERTS: Alert[] = [
-  new Alert({
-    id: 1,
-    sensorId: 3,
-    sensorName: 'SENSOR-03',
-    location: 'Sector Industrial',
-    type: 'Cloro',
-    severity: 'Crítica',
-    message: 'El dispositivo SENSOR-03 (Cloro) superó el umbral permitido.',
-    timestamp: new Date(Date.now() - 22 * 60000).toISOString(),
-    status: 'Activa',
-    value: 0.1,
-    threshold: 0.2
-  }),
-  new Alert({
-    id: 2,
-    sensorId: 2,
-    sensorName: 'SENSOR-02',
-    location: 'Reservorio Central',
-    type: 'Turbidez',
-    severity: 'Advertencia',
-    message: 'El dispositivo SENSOR-02 (Turbidez) se encuentra cerca del límite.',
-    timestamp: new Date(Date.now() - 85 * 60000).toISOString(),
-    status: 'Activa',
-    value: 5.8,
-    threshold: 5
-  }),
-  new Alert({
-    id: 3,
-    sensorId: 1,
-    sensorName: 'SENSOR-01',
-    location: 'Planta Norte',
-    type: 'pH',
-    severity: 'Advertencia',
-    message: 'Oscilación de pH estabilizada en Planta Norte.',
-    timestamp: new Date(Date.now() - 2 * 86400000).toISOString(),
-    status: 'Resuelta',
-    value: 6.4,
-    threshold: 6.5
-  })
-];
+interface SubscriptionResource {
+  id: number;
+  userId: number;
+  plan: string;
+  status: string;
+}
 
-const MOCK_PLANS = [
-  {
-    name: 'Monitoreo Base',
-    tier: 'Operaciones iniciales',
-    monthlyPrice: 350,
-    annualMonthlyPrice: 290,
-    monthlyCost: 350,
-    maxDevices: 10,
-    isUnlimited: false,
-    features: ['Hasta 10 dispositivos', 'Alertas esenciales', 'Historial de 30 días']
+interface PlanResource {
+  name: string;
+  monthlyCost: number;
+  maxDevices: number;
+  isUnlimited: boolean;
+}
+
+const PLAN_DETAILS: Record<string, { tier: string; features: string[] }> = {
+  Basic: {
+    tier: 'subscription.tierBasic',
+    features: ['subscription.featureBasicDevices', 'subscription.featureAlerts', 'subscription.featureHistory']
   },
-  {
-    name: 'Operador Integral',
-    tier: 'Equipos en crecimiento',
-    monthlyPrice: 1200,
-    annualMonthlyPrice: 990,
-    monthlyCost: 1200,
-    maxDevices: 50,
-    isUnlimited: false,
-    highlight: true,
-    features: ['Hasta 50 dispositivos', 'Analítica de calidad', 'Exportación de reportes']
+  'Smart City': {
+    tier: 'subscription.tierSmartCity',
+    features: ['subscription.featureSmartDevices', 'subscription.featureAnalytics', 'subscription.featureExports']
   },
-  {
-    name: 'Smart City / Industrial',
-    tier: 'Operación avanzada',
-    monthlyPrice: 3500,
-    annualMonthlyPrice: 2900,
-    monthlyCost: 3500,
-    maxDevices: null,
-    isUnlimited: true,
-    features: ['Dispositivos ilimitados', 'Soporte prioritario', 'Integraciones avanzadas']
-  }
-];
-
-const MOCK_SUBSCRIPTION: Subscription = {
-  id: 1,
-  plan: 'Operador Integral',
-  tier: 'Equipos en crecimiento',
-  price: 1200,
-  currency: 'PEN',
-  billingCycle: 'monthly',
-  status: 'Active',
-  startDate: '2026-03-15',
-  nextBillingDate: '2026-08-15',
-  paymentMethod: 'Visa **** 2048',
-  features: MOCK_PLANS[1].features,
-  usage: {
-    sensorsConnected: 4,
-    sensorsLimit: 50,
-    storageUsedGB: 18,
-    storageLimitGB: 100,
-    exports: 9,
-    exportsLimit: 100
+  Industrial: {
+    tier: 'subscription.tierIndustrial',
+    features: ['subscription.featureUnlimited', 'subscription.featureSupport', 'subscription.featureIntegrations']
   }
 };
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MonitoringService {
+  readonly sensors = signal<Sensor[]>([]);
+  readonly alerts = signal<Alert[]>([]);
+  readonly subscription = signal<Subscription | null>(null);
+  readonly plans = signal<any[]>([]);
+  readonly errors = signal<string[]>([]);
+  readonly sensorsLoaded = signal(false);
+  readonly alertsLoaded = signal(false);
+  readonly subscriptionLoaded = signal(false);
+  readonly plansLoaded = signal(false);
 
-  private sensorsEndpoint: BaseEndpoint<Sensor>;
-
-  private alertsEndpoint: BaseEndpoint<Alert>;
-
-  private subscriptionEndpoint: BaseEndpoint<Subscription>;
-
-  private plansEndpoint: BaseEndpoint<any>;
-
-  sensors = signal<Sensor[]>([]);
-
-  alerts = signal<Alert[]>([]);
-
-  subscription = signal<Subscription | null>(null);
-
-  plans = signal<any[]>([]);
-
-  errors = signal<string[]>([]);
-
-  sensorsLoaded = signal(false);
-
-  alertsLoaded = signal(false);
-
-  subscriptionLoaded = signal(false);
-
-  plansLoaded = signal(false);
-
-  activeSensorsCount = computed(() =>
-
-      this.sensors()
-          .filter(s => s.status !== 'Alerta')
-          .length
+  readonly activeSensorsCount = computed(() =>
+    this.sensors().filter(sensor => sensor.status !== 'Alerta').length
+  );
+  readonly criticalAlertsCount = computed(() =>
+    this.alerts().filter(alert =>
+      alert.severity === 'Crítica' && alert.status === 'Activa'
+    ).length
+  );
+  readonly activeAlerts = computed(() =>
+    this.alerts().filter(alert => alert.status === 'Activa')
   );
 
-  criticalAlertsCount = computed(() =>
-
-      this.alerts()
-          .filter(
-              a =>
-                  a.severity === 'Crítica' &&
-                  a.status === 'Activa'
-          )
-          .length
-  );
-
-  activeAlerts = computed(() =>
-
-      this.alerts()
-          .filter(a => a.status === 'Activa')
-  );
-
-  constructor(private http: HttpClient) {
-
-    const base = environment.apiUrl;
-
-    const subscriptionBase =
-        environment.subscriptionApiUrl;
-
-    this.sensorsEndpoint =
-        new BaseEndpoint(
-            http,
-            base,
-            environment.sensorsEndpoint
-        );
-
-    this.alertsEndpoint =
-        new BaseEndpoint(
-            http,
-            base,
-            environment.alertsEndpoint
-        );
-
-    this.subscriptionEndpoint =
-        new BaseEndpoint(
-            http,
-            subscriptionBase,
-            environment.subscriptionEndpoint
-        );
-
-    this.plansEndpoint =
-        new BaseEndpoint(
-            http,
-            subscriptionBase,
-            environment.plansEndpoint
-        );
-  }
+  constructor(
+    private readonly http: HttpClient,
+    private readonly translate: TranslateService,
+    private readonly auth: AuthenticationService
+  ) {}
 
   fetchSensors(): void {
-    if (!environment.apiUrl) {
-      this.sensors.set(MOCK_SENSORS);
-      this.sensorsLoaded.set(true);
-      return;
-    }
-
-    this.sensorsEndpoint.getAll().subscribe({
-
-      next: (data) => {
-
-        this.sensors.set(
-            SensorAssembler.toEntitiesFromArray(data)
-        );
-
+    this.sensorsLoaded.set(false);
+    this.http.get<DeviceResource[]>(`${environment.apiUrl}/devices`).pipe(
+      switchMap(devices => {
+        if (!devices.length) return of([] as Sensor[]);
+        return forkJoin(devices.map(device =>
+          this.http.get<ThresholdResource[]>(`${environment.apiUrl}/devices/${device.id}/thresholds`).pipe(
+            map(thresholds => this.toSensor(device, thresholds.at(-1))),
+            catchError(() => of(this.toSensor(device)))
+          )
+        ));
+      })
+    ).subscribe({
+      next: sensors => {
+        this.sensors.set(sensors);
         this.sensorsLoaded.set(true);
       },
-
-      error: (err) => {
-
-        this.sensors.set(MOCK_SENSORS);
-        this.sensorsLoaded.set(true);
-
-        this.errors.update(e => [
-          ...e,
-          err.message
-        ]);
-      }
+      error: error => this.recordError(error, this.sensorsLoaded)
     });
   }
 
   getSensorById(id: string | number): Sensor | undefined {
-
-    return this.sensors().find(
-        s => Number(s.id) === Number(id)
-    );
+    return this.sensors().find(sensor => Number(sensor.id) === Number(id));
   }
 
   addSensor(sensor: Sensor): void {
-    if (!environment.apiUrl) {
-      const nextId = Math.max(0, ...this.sensors().map(item => Number(item.id ?? 0))) + 1;
-      this.sensors.update(list => [...list, new Sensor({ ...sensor, id: nextId })]);
-      return;
-    }
+    const ownerId = this.auth.currentUser()?.id;
+    if (!ownerId) return;
 
-    this.sensorsEndpoint.create(sensor).subscribe({
+    const createPayload = {
+      ownerId,
+      serialNumber: this.serialNumberFor(sensor),
+      deviceType: this.toApiDeviceType(sensor.type),
+      name: sensor.name,
+      location: sensor.location,
+      unit: sensor.unit,
+      currentValue: sensor.currentValue,
+      destinationId: sensor.destinationId
+    };
 
-      next: (created) => {
-
-        this.sensors.update(list => [
-
-          ...list,
-
-          SensorAssembler
-              .toEntityFromResource(created)
-        ]);
+    this.http.post<DeviceResource>(`${environment.apiUrl}/devices`, createPayload).pipe(
+      switchMap(device => this.saveThreshold(device.id, sensor).pipe(
+        switchMap(threshold => this.http.put<DeviceResource>(
+          `${environment.apiUrl}/devices/${device.id}`,
+          this.updatePayload(sensor)
+        ).pipe(map(updated => ({ updated, threshold }))))
+      ))
+    ).subscribe({
+      next: ({ updated, threshold }) => {
+        const entity = this.toSensor(updated, threshold);
+        this.sensors.update(items => [...items, entity]);
+        this.syncAutomaticAlert(entity);
       },
-
-      error: (err) => {
-
-        this.errors.update(e => [
-          ...e,
-          err.message
-        ]);
-      }
+      error: error => this.recordError(error)
     });
   }
 
   updateSensor(sensor: Sensor): void {
-    if (!environment.apiUrl) {
-      this.sensors.update(list =>
-          list.map(item => item.id === sensor.id ? new Sensor(sensor) : item)
-      );
-      return;
-    }
+    if (!sensor.id) return;
 
-    this.sensorsEndpoint
-        .update(sensor.id!, sensor)
-        .subscribe({
-
-          next: (updated) => {
-
-            const entity =
-                SensorAssembler
-                    .toEntityFromResource(updated);
-
-            this.sensors.update(list =>
-
-                list.map(s =>
-
-                    s.id === entity.id
-                        ? entity
-                        : s
-                )
-            );
-          },
-
-          error: (err) => {
-
-            this.errors.update(e => [
-              ...e,
-              err.message
-            ]);
-          }
-        });
+    forkJoin({
+      device: this.http.put<DeviceResource>(
+        `${environment.apiUrl}/devices/${sensor.id}`,
+        this.updatePayload(sensor)
+      ),
+      threshold: this.saveThreshold(sensor.id, sensor)
+    }).subscribe({
+      next: ({ device, threshold }) => {
+        const entity = this.toSensor(device, threshold);
+        this.sensors.update(items =>
+          items.map(item => item.id === entity.id ? entity : item)
+        );
+        this.syncAutomaticAlert(entity);
+      },
+      error: error => this.recordError(error)
+    });
   }
 
   deleteSensor(id: number): void {
-    if (!environment.apiUrl) {
-      this.sensors.update(list => list.filter(sensor => sensor.id !== id));
-      return;
-    }
-
-    this.sensorsEndpoint
-        .delete(id)
-        .subscribe({
-
-          next: () => {
-
-            this.sensors.update(list =>
-
-                list.filter(
-                    sensor => sensor.id !== id
-                )
-            );
-          },
-
-          error: (err) => {
-
-            this.errors.update(e => [
-              ...e,
-              err.message
-            ]);
-          }
-        });
+    this.http.delete<void>(`${environment.apiUrl}/devices/${id}`).subscribe({
+      next: () => {
+        this.sensors.update(items => items.filter(sensor => sensor.id !== id));
+        this.alerts.update(items => items.filter(alert => alert.sensorId !== id));
+      },
+      error: error => this.recordError(error)
+    });
   }
 
   fetchAlerts(): void {
-    if (!environment.apiUrl) {
-      this.alerts.set(MOCK_ALERTS);
-      this.alertsLoaded.set(true);
-      return;
-    }
-
-    this.alertsEndpoint.getAll().subscribe({
-
-      next: (data) => {
-
-        this.alerts.set(
-            AlertAssembler.toEntitiesFromArray(data)
-        );
-
+    this.alertsLoaded.set(false);
+    this.http.get<AlertResource[]>(`${environment.apiUrl}/alerts`).subscribe({
+      next: resources => {
+        this.alerts.set(resources.map(resource => this.toAlert(resource)));
         this.alertsLoaded.set(true);
       },
+      error: error => this.recordError(error, this.alertsLoaded)
+    });
+  }
 
-      error: (err) => {
+  resolveAlert(alert: Alert): void {
+    if (!alert.id || !alert.sensorId) return;
 
-        this.alerts.set(MOCK_ALERTS);
-        this.alertsLoaded.set(true);
-
-        this.errors.update(e => [
-          ...e,
-          err.message
-        ]);
-      }
+    this.http.put<AlertResource>(`${environment.apiUrl}/alerts/${alert.id}`, {
+      deviceId: alert.sensorId,
+      deviceName: alert.sensorName,
+      location: alert.location,
+      type: alert.type,
+      severity: alert.severity === 'Crítica' ? 'Critical' : 'Warning',
+      message: alert.message,
+      timestamp: alert.timestamp,
+      status: 'Resolved',
+      value: alert.value,
+      threshold: alert.threshold
+    }).subscribe({
+      next: resource => {
+        const resolved = this.toAlert(resource);
+        this.alerts.update(items =>
+          items.map(item => item.id === resolved.id ? resolved : item)
+        );
+      },
+      error: error => this.recordError(error)
     });
   }
 
   fetchSubscription(): void {
-    if (!environment.subscriptionApiUrl) {
-      this.subscription.set(MOCK_SUBSCRIPTION);
-      this.subscriptionLoaded.set(true);
-      return;
-    }
+    const userId = this.auth.currentUser()?.id;
+    if (!userId) return;
 
-    this.subscriptionEndpoint.getAll().subscribe({
-
-      next: (data: any) => {
-
-        const result =
-            Array.isArray(data)
-                ? data[0]
-                : data;
-
-        this.subscription.set(result);
-
+    this.subscriptionLoaded.set(false);
+    this.http.get<SubscriptionResource>(
+      `${environment.apiUrl}/subscriptions/by-user/${userId}`
+    ).subscribe({
+      next: resource => {
+        this.subscription.set(this.toSubscription(resource));
         this.subscriptionLoaded.set(true);
       },
-
-      error: (err) => {
-
-        this.subscription.set(MOCK_SUBSCRIPTION);
-        this.subscriptionLoaded.set(true);
-
-        this.errors.update(e => [
-          ...e,
-          err.message
-        ]);
+      error: error => {
+        if (error instanceof HttpErrorResponse && error.status === 404) {
+          this.subscription.set(null);
+          this.subscriptionLoaded.set(true);
+          return;
+        }
+        this.recordError(error, this.subscriptionLoaded);
       }
     });
   }
 
   fetchPlans(): void {
-    if (!environment.subscriptionApiUrl) {
-      this.plans.set(MOCK_PLANS);
-      this.plansLoaded.set(true);
-      return;
-    }
-
-    this.plansEndpoint.getAll().subscribe({
-
-      next: (data: any) => {
-
-        this.plans.set(data);
-
+    this.plansLoaded.set(false);
+    this.http.get<PlanResource[]>(`${environment.apiUrl}/subscriptions/plans`).subscribe({
+      next: resources => {
+        this.plans.set(resources.map(plan => ({
+          ...plan,
+          tier: PLAN_DETAILS[plan.name]?.tier ?? '',
+          monthlyPrice: this.planPrice(plan.name),
+          annualMonthlyPrice: Math.round(this.planPrice(plan.name) * 0.83),
+          maxDevices: plan.name === 'Smart City' ? 50 : plan.maxDevices,
+          features: PLAN_DETAILS[plan.name]?.features ?? []
+        })));
         this.plansLoaded.set(true);
       },
-
-      error: (err) => {
-
-        this.plans.set(MOCK_PLANS);
-        this.plansLoaded.set(true);
-
-        this.errors.update(e => [
-          ...e,
-          err.message
-        ]);
-      }
+      error: error => this.recordError(error, this.plansLoaded)
     });
   }
 
-  changePlan(
-      plan: string,
-      tier: string,
-      price: number,
-      features: string[]
-  ): void {
-
+  changePlan(plan: string, _tier: string, _price: number, _features: string[]): void {
     const current = this.subscription();
-
     if (!current) return;
 
-    this.subscription.set({
-
-      ...current,
-
-      plan,
-
-      tier,
-
-      price,
-
-      features
+    this.http.put<SubscriptionResource>(
+      `${environment.apiUrl}/subscriptions/${current.id}/plan`,
+      { newPlan: plan }
+    ).subscribe({
+      next: resource => this.subscription.set(this.toSubscription(resource)),
+      error: error => this.recordError(error)
     });
   }
 
-  changeBillingCycle(
-      cycle: 'monthly' | 'yearly'
-  ): void {
-
+  changeBillingCycle(cycle: 'monthly' | 'yearly'): void {
     const current = this.subscription();
-
     if (!current) return;
-
-    let updatedPrice = current.price;
-
-    if (cycle === 'yearly') {
-
-      updatedPrice =
-          Math.round(current.price * 0.83);
-
-    } else {
-
-      if (current.plan === 'Monitoreo Base') {
-        updatedPrice = 350;
-      }
-
-      if (current.plan === 'Operador Integral') {
-        updatedPrice = 1200;
-      }
-
-      if (
-          current.plan === 'Smart City / Industrial'
-      ) {
-        updatedPrice = 3500;
-      }
-    }
-
+    const basePrice = this.planPrice(current.plan);
     this.subscription.set({
-
       ...current,
-
       billingCycle: cycle,
-
-      price: updatedPrice
+      price: cycle === 'yearly' ? Math.round(basePrice * 0.83) : basePrice
     });
+  }
+
+  alertMessage(alert: Alert): string {
+    return this.translate.instant(
+      alert.severity === 'Crítica' ? 'alerts.autoMsgCritical' : 'alerts.autoMsgWarning',
+      { name: alert.sensorName, parameter: alert.type }
+    );
+  }
+
+  alertSeverityLabel(alert: Alert): string {
+    return this.translate.instant(
+      alert.severity === 'Crítica' ? 'alerts.critical' : 'alerts.warning'
+    );
+  }
+
+  sensorStatusLabel(status: Sensor['status']): string {
+    if (status === 'Alerta') return this.translate.instant('sensors.alertStatus');
+    if (status === 'Advertencia') return this.translate.instant('sensors.warningStatus');
+    return this.translate.instant('sensors.normalStatus');
+  }
+
+  formatRelativeDate(iso: string): string {
+    if (!iso) return '';
+    const locale = this.translate.currentLang === 'es' ? 'es-PE' : 'en-US';
+    const minutes = Math.round((new Date(iso).getTime() - Date.now()) / 60000);
+    const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (Math.abs(minutes) < 60) return formatter.format(minutes, 'minute');
+    const hours = Math.round(minutes / 60);
+    if (Math.abs(hours) < 24) return formatter.format(hours, 'hour');
+    return formatter.format(Math.round(hours / 24), 'day');
+  }
+
+  formatDateTime(iso: string): string {
+    if (!iso) return '';
+    const locale = this.translate.currentLang === 'es' ? 'es-PE' : 'en-US';
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(iso));
+  }
+
+  private saveThreshold(deviceId: number, sensor: Sensor) {
+    return this.http.post<ThresholdResource>(
+      `${environment.apiUrl}/devices/${deviceId}/thresholds`,
+      {
+        minValue: sensor.minAlert,
+        maxValue: sensor.maxAlert,
+        unit: sensor.unit,
+        alertLevel: sensor.status === 'Alerta' ? 'Critical' : 'Warning'
+      }
+    );
+  }
+
+  private syncAutomaticAlert(sensor: Sensor): void {
+    const severity = sensor.status === 'Alerta'
+      ? 'Crítica'
+      : sensor.status === 'Advertencia' ? 'Advertencia' : null;
+
+    if (!sensor.id) return;
+
+    this.http.get<AlertResource[]>(`${environment.apiUrl}/alerts/device/${sensor.id}`).pipe(
+      switchMap(resources => {
+        const active = resources.filter(resource =>
+          !resource.status.toLowerCase().startsWith('res')
+        );
+        if (!active.length) return of([]);
+
+        return forkJoin(active.map(resource =>
+          this.http.put<AlertResource>(`${environment.apiUrl}/alerts/${resource.id}`, {
+            deviceId: resource.deviceId,
+            deviceName: resource.deviceName,
+            location: resource.location,
+            type: resource.type,
+            severity: resource.severity,
+            message: resource.message,
+            timestamp: resource.timestamp,
+            status: 'Resolved',
+            value: resource.value,
+            threshold: resource.threshold
+          })
+        ));
+      }),
+      switchMap(() => {
+        this.alerts.update(items => items.map(item =>
+          item.sensorId === sensor.id && item.status === 'Activa'
+            ? new Alert({ ...item, status: 'Resuelta' })
+            : item
+        ));
+
+        if (!severity) return of(null);
+
+        const threshold = sensor.currentValue < sensor.minAlert
+          ? sensor.minAlert
+          : sensor.maxAlert;
+        const alert = new Alert({
+          sensorId: sensor.id,
+          sensorName: sensor.name,
+          location: sensor.location,
+          type: sensor.type,
+          severity,
+          message: this.translate.instant(
+            severity === 'Crítica' ? 'alerts.autoMsgCritical' : 'alerts.autoMsgWarning',
+            { name: sensor.name, parameter: sensor.type }
+          ),
+          timestamp: new Date().toISOString(),
+          status: 'Activa',
+          value: sensor.currentValue,
+          threshold
+        });
+
+        return this.http.post<AlertResource>(`${environment.apiUrl}/alerts`, {
+          deviceId: alert.sensorId,
+          deviceName: alert.sensorName,
+          location: alert.location,
+          type: alert.type,
+          severity: severity === 'Crítica' ? 'Critical' : 'Warning',
+          message: alert.message,
+          timestamp: alert.timestamp,
+          status: 'Active',
+          value: alert.value,
+          threshold: alert.threshold
+        });
+      })
+    ).subscribe({
+      next: resource => {
+        if (resource) {
+          this.alerts.update(items => [this.toAlert(resource), ...items]);
+          this.alertsLoaded.set(true);
+        }
+      },
+      error: error => this.recordError(error)
+    });
+  }
+
+  private toSensor(device: DeviceResource, threshold?: ThresholdResource): Sensor {
+    const min = threshold?.minValue ?? 0;
+    const max = threshold?.maxValue ?? 0;
+    return new Sensor({
+      id: device.id,
+      name: device.name || device.serialNumber,
+      location: device.location || '',
+      destinationId: device.destinationId,
+      type: device.deviceType,
+      currentValue: Number(device.currentValue ?? 0),
+      unit: device.unit || threshold?.unit || '',
+      status: this.toUiStatus(device.currentStatus),
+      lastUpdated: device.lastTelemetrySync,
+      recommendedRange: threshold ? `${min} - ${max} ${threshold.unit}` : '',
+      minAlert: min,
+      maxAlert: max,
+      history: Array(7).fill(Number(device.currentValue ?? 0))
+    });
+  }
+
+  private toAlert(resource: AlertResource): Alert {
+    return new Alert({
+      id: resource.id,
+      sensorId: resource.deviceId,
+      sensorName: resource.deviceName,
+      location: resource.location,
+      type: resource.type,
+      severity: resource.severity.toLowerCase().startsWith('crit') ? 'Crítica' : 'Advertencia',
+      message: resource.message,
+      timestamp: resource.timestamp,
+      status: resource.status.toLowerCase().startsWith('res') ? 'Resuelta' : 'Activa',
+      value: resource.value,
+      threshold: resource.threshold
+    });
+  }
+
+  private toSubscription(resource: SubscriptionResource): Subscription {
+    const plan = resource.plan;
+    const details = PLAN_DETAILS[plan] ?? { tier: '', features: [] };
+    const price = this.planPrice(plan);
+    return {
+      id: resource.id,
+      plan,
+      tier: details.tier,
+      price,
+      currency: 'USD',
+      billingCycle: 'monthly',
+      status: resource.status,
+      startDate: '',
+      nextBillingDate: '',
+      paymentMethod: '',
+      features: details.features,
+      usage: {
+        sensorsConnected: this.sensors().length,
+        sensorsLimit: plan === 'Industrial' ? -1 : plan === 'Smart City' ? 50 : 10,
+        storageUsedGB: 0,
+        storageLimitGB: 100,
+        exports: 0,
+        exportsLimit: 100
+      }
+    };
+  }
+
+  private updatePayload(sensor: Sensor) {
+    return {
+      currentStatus: this.toApiStatus(sensor.status),
+      lastTelemetrySync: sensor.lastUpdated || new Date().toISOString(),
+      name: sensor.name,
+      location: sensor.location,
+      unit: sensor.unit,
+      currentValue: sensor.currentValue
+    };
+  }
+
+  private serialNumberFor(sensor: Sensor): string {
+    const normalized = sensor.name.trim().replace(/\s+/g, '-').toUpperCase();
+    return normalized || `DEVICE-${Date.now()}`;
+  }
+
+  private toApiDeviceType(type: string): string {
+    const normalized = type.toLowerCase();
+    if (normalized === 'ph') return 'PH';
+    if (normalized.includes('turbi')) return 'Turbidity';
+    if (normalized.includes('pres') || normalized === 'pressure') return 'Pressure';
+    if (normalized.includes('nivel') || normalized === 'level') return 'Level';
+    if (normalized.includes('cloro') || normalized === 'chlorine') return 'Chlorine';
+    if (normalized.includes('flujo') || normalized === 'flow') return 'Flow';
+    return type;
+  }
+
+  private toApiStatus(status: Sensor['status']): string {
+    if (status === 'Advertencia') return 'Warning';
+    if (status === 'Alerta') return 'Alert';
+    return 'Normal';
+  }
+
+  private toUiStatus(status: string): Sensor['status'] {
+    if (status.toLowerCase() === 'warning') return 'Advertencia';
+    if (status.toLowerCase() === 'alert') return 'Alerta';
+    return 'Normal';
+  }
+
+  private planPrice(plan: string): number {
+    if (plan === 'Industrial') return 3500;
+    if (plan === 'Smart City') return 1200;
+    return 350;
+  }
+
+  private recordError(error: unknown, loadedSignal?: { set(value: boolean): void }): void {
+    const httpError = error as HttpErrorResponse;
+    const message = httpError?.error?.detail || httpError?.error?.message || httpError?.message ||
+      'The request could not be completed.';
+    this.errors.update(items => [...items, message]);
+    loadedSignal?.set(true);
   }
 }

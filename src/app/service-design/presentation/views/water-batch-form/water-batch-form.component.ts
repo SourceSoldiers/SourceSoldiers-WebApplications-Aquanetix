@@ -41,7 +41,7 @@ import { ServiceDesignService, WaterBatch } from '../../../application/service-d
         <mat-card-content>
           <div *ngIf="errorMessage" class="error-box">
             <mat-icon>error</mat-icon>
-            {{ errorMessage }}
+            {{ errorMessage | translate }}
           </div>
 
           <div class="form-grid">
@@ -67,7 +67,9 @@ import { ServiceDesignService, WaterBatch } from '../../../application/service-d
             <mat-form-field appearance="outline">
               <mat-label>{{ 'waterBatches.source' | translate }}</mat-label>
               <mat-select [(ngModel)]="sourceSelect" (ngModelChange)="syncSource()">
-                <mat-option *ngFor="let source of sourceOptions" [value]="source">{{ source }}</mat-option>
+                <mat-option *ngFor="let source of sourceOptions" [value]="source.value">
+                  {{ source.label | translate }}
+                </mat-option>
                 <mat-option value="__other__">{{ 'waterBatches.sourceOther' | translate }}</mat-option>
               </mat-select>
             </mat-form-field>
@@ -85,9 +87,9 @@ import { ServiceDesignService, WaterBatch } from '../../../application/service-d
             <mat-form-field appearance="outline">
               <mat-label>{{ 'waterBatches.status' | translate }}</mat-label>
               <mat-select [(ngModel)]="form.status">
-                <mat-option value="Pendiente">Pendiente</mat-option>
-                <mat-option value="Entregado">Entregado</mat-option>
-                <mat-option value="Cancelado">Cancelado</mat-option>
+                <mat-option value="Pendiente">{{ 'waterBatches.pending' | translate }}</mat-option>
+                <mat-option value="Entregado">{{ 'waterBatches.delivered' | translate }}</mat-option>
+                <mat-option value="Cancelado">{{ 'waterBatches.cancelled' | translate }}</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -155,8 +157,12 @@ export class WaterBatchFormComponent implements OnInit {
   isEdit = false;
   errorMessage = '';
   deliveryLocal = new Date().toISOString().slice(0, 16);
-  sourceOptions = ['Planta de tratamiento', 'Pozo certificado', 'Reservorio municipal'];
-  sourceSelect = this.sourceOptions[0];
+  sourceOptions = [
+    { value: 'Treatment plant', label: 'waterBatches.sourceTreatment' },
+    { value: 'Certified well', label: 'waterBatches.sourceWell' },
+    { value: 'Municipal reservoir', label: 'waterBatches.sourceReservoir' }
+  ];
+  sourceSelect = this.sourceOptions[0].value;
 
   form: Omit<WaterBatch, 'id'> & { id?: number } = {
     certificationCode: '',
@@ -164,7 +170,7 @@ export class WaterBatchFormComponent implements OnInit {
     volumeLiters: 0,
     deliveryTimestamp: new Date().toISOString(),
     status: 'Pendiente',
-    source: this.sourceOptions[0]
+    source: this.sourceOptions[0].value
   };
 
   constructor(
@@ -184,7 +190,9 @@ export class WaterBatchFormComponent implements OnInit {
 
     this.form = { ...batch };
     this.deliveryLocal = batch.deliveryTimestamp.slice(0, 16);
-    this.sourceSelect = this.sourceOptions.includes(batch.source) ? batch.source : '__other__';
+    this.sourceSelect = this.sourceOptions.some(option => option.value === batch.source)
+      ? batch.source
+      : '__other__';
   }
 
   syncSource(): void {
@@ -199,22 +207,22 @@ export class WaterBatchFormComponent implements OnInit {
     this.errorMessage = '';
 
     if (!this.form.certificationCode.trim()) {
-      this.errorMessage = 'Ingresa un codigo de certificacion.';
+      this.errorMessage = 'waterBatches.certificationRequired';
       return;
     }
 
     if (!this.form.destinationSectorId) {
-      this.errorMessage = 'Selecciona un destino.';
+      this.errorMessage = 'waterBatches.destinationRequired';
       return;
     }
 
     if (!this.form.volumeLiters || this.form.volumeLiters <= 0) {
-      this.errorMessage = 'Ingresa un volumen valido.';
+      this.errorMessage = 'waterBatches.volumeRequired';
       return;
     }
 
     if (!this.form.source.trim()) {
-      this.errorMessage = 'Selecciona o escribe una fuente.';
+      this.errorMessage = 'waterBatches.sourceRequired';
       return;
     }
 

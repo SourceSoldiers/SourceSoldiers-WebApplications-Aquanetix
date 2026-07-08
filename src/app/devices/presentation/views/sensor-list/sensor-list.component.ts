@@ -194,7 +194,7 @@ import { Sensor } from '../../../domain/model/sensor.entity';
                     </p>
 
                     <p class="sensor-subtitle">
-                      Sensor ID #{{ s.id }}
+                      Device ID #{{ s.id }}
                     </p>
 
                   </div>
@@ -269,7 +269,7 @@ import { Sensor } from '../../../domain/model/sensor.entity';
                   class="status-chip"
                   [ngClass]="getStatusChipClass(s.status)"
                 >
-                  {{ s.status }}
+                  {{ store.sensorStatusLabel(s.status) }}
                 </span>
 
               </td>

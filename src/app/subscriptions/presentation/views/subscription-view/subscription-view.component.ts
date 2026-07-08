@@ -76,7 +76,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                   </h2>
 
                   <p class="tier">
-                    {{ store.subscription()!.tier }}
+                    {{ store.subscription()!.tier | translate }}
                   </p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                     check
                   </mat-icon>
 
-                  {{ feature }}
+                  {{ feature | translate }}
                 </li>
               </ul>
 

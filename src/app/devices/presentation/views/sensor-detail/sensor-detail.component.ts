@@ -89,7 +89,7 @@ interface ChartBar {
             <p class="subtitle">
               {{ sensor()!.location }}
               ·
-              {{ 'sensorDetail.type' | translate }}:
+              {{ 'sensorDetail.parameter' | translate }}:
               {{ sensor()!.type }}
             </p>
 
@@ -101,7 +101,7 @@ interface ChartBar {
               class="status-chip"
               [ngClass]="getStatusChipClass(sensor()!.status)"
             >
-              {{ sensor()!.status }}
+              {{ store.sensorStatusLabel(sensor()!.status) }}
             </span>
 
             <button mat-stroked-button>
@@ -145,7 +145,7 @@ interface ChartBar {
                   class="status-chip mt-2"
                   [ngClass]="getStatusChipClass(sensor()!.status)"
                 >
-                  {{ sensor()!.status }}
+                  {{ store.sensorStatusLabel(sensor()!.status) }}
                 </span>
 
               </mat-card-content>
@@ -362,7 +362,7 @@ interface ChartBar {
                   <span class="text-muted">{{ 'sensorDetail.locationLabel' | translate }}</span>
                   <span class="font-semibold">{{ sensor()!.location }}</span>
 
-                  <span class="text-muted">{{ 'sensorDetail.typeLabel' | translate }}</span>
+                  <span class="text-muted">{{ 'sensorDetail.parameterLabel' | translate }}</span>
                   <span class="font-semibold">{{ sensor()!.type }}</span>
 
                   <span class="text-muted">{{ 'sensorDetail.recommendedRange' | translate }}</span>
@@ -377,7 +377,7 @@ interface ChartBar {
                     class="status-chip"
                     [ngClass]="getStatusChipClass(sensor()!.status)"
                   >
-                    {{ sensor()!.status }}
+                    {{ store.sensorStatusLabel(sensor()!.status) }}
                   </span>
 
                 </div>
@@ -903,11 +903,17 @@ export class SensorDetailComponent {
         | 'Advertencia'
         | 'Alerta' = 'Normal';
 
-    if (
-        sensor.currentValue < this.editMin ||
-        sensor.currentValue > this.editMax
-    ) {
+    if (sensor.currentValue < this.editMin || sensor.currentValue > this.editMax) {
       status = 'Alerta';
+    } else {
+      const margin = (this.editMax - this.editMin) * 0.1;
+
+      if (
+          sensor.currentValue <= this.editMin + margin ||
+          sensor.currentValue >= this.editMax - margin
+      ) {
+        status = 'Advertencia';
+      }
     }
 
     const updated = new Sensor({

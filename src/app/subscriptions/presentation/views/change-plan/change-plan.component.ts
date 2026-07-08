@@ -86,7 +86,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
           <h2>{{ plan.name }}</h2>
 
           <p class="tier">
-            {{ plan.tier }}
+            {{ plan.tier | translate }}
           </p>
 
           <div class="price">
@@ -140,7 +140,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                 check_circle
               </mat-icon>
 
-              {{ feature }}
+              {{ feature | translate }}
             </li>
           </ul>
 

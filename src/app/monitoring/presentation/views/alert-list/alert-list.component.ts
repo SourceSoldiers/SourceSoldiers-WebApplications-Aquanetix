@@ -173,7 +173,7 @@ import { Alert } from '../../../domain/model/alert.entity';
 
           <p class="text-sm text-muted">
 
-            ¿Buscas el historial?
+            {{ 'alerts.historyPrompt' | translate }}
 
             <button
               mat-button
@@ -184,7 +184,7 @@ import { Alert } from '../../../domain/model/alert.entity';
                 )
               "
             >
-              Ver alertas resueltas
+              {{ 'alerts.viewResolved' | translate }}
             </button>
 
           </p>
@@ -255,7 +255,7 @@ import { Alert } from '../../../domain/model/alert.entity';
                           : 'chip-warning'
                       "
                     >
-                      {{ alert.severity }}
+                      {{ store.alertSeverityLabel(alert) }}
                     </span>
 
                     <span
@@ -264,13 +264,13 @@ import { Alert } from '../../../domain/model/alert.entity';
                         chip-active
                       "
                     >
-                      Activa
+                      {{ 'alerts.active' | translate }}
                     </span>
 
                   </div>
 
                   <p class="alert-title">
-                    {{ alert.message }}
+                    {{ store.alertMessage(alert) }}
                   </p>
 
                   <p class="alert-meta">
@@ -294,7 +294,7 @@ import { Alert } from '../../../domain/model/alert.entity';
 
                   <p class="text-sm text-muted">
 
-                    {{ formatDate(alert.timestamp) }}
+                    {{ store.formatRelativeDate(alert.timestamp) }}
 
                   </p>
 
@@ -302,9 +302,10 @@ import { Alert } from '../../../domain/model/alert.entity';
                     mat-button
                     color="primary"
                     class="details-btn"
+                    (click)="store.resolveAlert(alert)"
                   >
 
-                    {{ 'alerts.viewDetails' | translate }}
+                    {{ 'alerts.resolve' | translate }}
 
                   </button>
 

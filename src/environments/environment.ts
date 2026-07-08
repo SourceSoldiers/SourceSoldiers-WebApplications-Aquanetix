@@ -1,9 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: '',
-  sensorsEndpoint: '/sensors',
-  alertsEndpoint: '/alerts',
-  subscriptionApiUrl: '',
-  subscriptionEndpoint: '/subscription',
-  plansEndpoint: '/plans'
+  apiUrl: 'https://aquanetix-platform-vwyl.onrender.com/api/v1'
 };

@@ -113,7 +113,9 @@ import { ServiceDesignService, WaterBatch } from '../../../application/service-d
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>{{ 'waterBatches.status' | translate }}</th>
             <td mat-cell *matCellDef="let batch">
-              <span class="status-chip" [ngClass]="statusClass(batch.status)">{{ batch.status }}</span>
+              <span class="status-chip" [ngClass]="statusClass(batch.status)">
+                {{ statusKey(batch.status) | translate }}
+              </span>
             </td>
           </ng-container>
 
@@ -256,8 +258,14 @@ export class WaterBatchListComponent {
   }
 
   statusClass(status: WaterBatch['status']): string {
-    if (status === 'Entregado') return 'chip-delivered';
-    if (status === 'Cancelado') return 'chip-cancelled';
+    if (['Entregado', 'Delivered'].includes(status)) return 'chip-delivered';
+    if (['Cancelado', 'Cancelled'].includes(status)) return 'chip-cancelled';
     return 'chip-pending';
+  }
+
+  statusKey(status: WaterBatch['status']): string {
+    if (['Entregado', 'Delivered'].includes(status)) return 'waterBatches.delivered';
+    if (['Cancelado', 'Cancelled'].includes(status)) return 'waterBatches.cancelled';
+    return 'waterBatches.pending';
   }
 }

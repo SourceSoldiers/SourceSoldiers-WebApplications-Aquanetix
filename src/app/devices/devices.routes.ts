@@ -6,7 +6,7 @@ export const devicesRoutes: Routes = [
         loadComponent: () =>
             import('./presentation/views/sensor-list/sensor-list.component')
                 .then(m => m.SensorListComponent),
-        title: 'Aquanetix - Sensors'
+        title: 'Aquanetix - Devices'
     },
 
     {
@@ -14,7 +14,7 @@ export const devicesRoutes: Routes = [
         loadComponent: () =>
             import('./presentation/views/sensor-form/sensor-form.component')
                 .then(m => m.SensorFormComponent),
-        title: 'Aquanetix - New Sensor'
+        title: 'Aquanetix - New Device'
     },
 
     {
@@ -22,7 +22,7 @@ export const devicesRoutes: Routes = [
         loadComponent: () =>
             import('./presentation/views/sensor-form/sensor-form.component')
                 .then(m => m.SensorFormComponent),
-        title: 'Aquanetix - Edit Sensor'
+        title: 'Aquanetix - Edit Device'
     },
 
     {
@@ -30,6 +30,6 @@ export const devicesRoutes: Routes = [
         loadComponent: () =>
             import('./presentation/views/sensor-detail/sensor-detail.component')
                 .then(m => m.SensorDetailComponent),
-        title: 'Aquanetix - Sensor Detail'
+        title: 'Aquanetix - Device Detail'
     }
 ];

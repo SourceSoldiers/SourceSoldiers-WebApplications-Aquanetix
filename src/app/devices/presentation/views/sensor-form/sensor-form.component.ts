@@ -85,7 +85,7 @@ import { ServiceDesignService } from '../../../../service-design/application/ser
             </mat-label>
 
             <mat-select
-              [(ngModel)]="form.location"
+              [(ngModel)]="form.destinationId"
               required
             >
 
@@ -93,7 +93,7 @@ import { ServiceDesignService } from '../../../../service-design/application/ser
                 *ngFor="
                   let destination of serviceDesign.destinations()
                 "
-                [value]="destination.name"
+                [value]="destination.id"
               >
 
                 {{ destination.name }}
@@ -105,7 +105,7 @@ import { ServiceDesignService } from '../../../../service-design/application/ser
             <mat-hint
               *ngIf="serviceDesign.destinations().length === 0"
             >
-              {{ 'destinations.empty' | translate }}
+              {{ 'sensors.noDestinations' | translate }}
             </mat-hint>
 
           </mat-form-field>
@@ -443,6 +443,7 @@ export class SensorFormComponent
   form = {
     name: '',
     location: '',
+    destinationId: null as number | null,
     type: '',
     unit: '',
     currentValue: 0,
@@ -451,33 +452,23 @@ export class SensorFormComponent
   };
 
   sensorTypeOptions = [
-    { label: 'pH', value: 'pH' },
-    { label: 'Turbidez', value: 'Turbidez' },
-    { label: 'Presión', value: 'Presión' },
-    { label: 'Nivel', value: 'Nivel' },
-    { label: 'Cloro', value: 'Cloro' },
-    { label: 'Flujo', value: 'Flujo' },
-    {
-      label: 'Oxígeno disuelto',
-      value: 'Oxígeno disuelto'
-    },
-    {
-      label: 'Temperatura',
-      value: 'Temperatura'
-    }
+    { label: 'pH', value: 'PH' },
+    { label: 'Turbidity', value: 'Turbidity' },
+    { label: 'Pressure', value: 'Pressure' },
+    { label: 'Level', value: 'Level' },
+    { label: 'Chlorine', value: 'Chlorine' },
+    { label: 'Flow', value: 'Flow' }
   ];
 
   private unitSuggestions:
       Record<string, string> = {
 
-    'pH': 'pH',
-    'Turbidez': 'NTU',
-    'Presión': 'bar',
-    'Nivel': '%',
-    'Cloro': 'ppm',
-    'Flujo': '%',
-    'Oxígeno disuelto': 'mg/L',
-    'Temperatura': '°C'
+    'PH': 'pH',
+    'Turbidity': 'NTU',
+    'Pressure': 'bar',
+    'Level': '%',
+    'Chlorine': 'ppm',
+    'Flow': 'L/s'
   };
 
   constructor(
@@ -521,6 +512,13 @@ export class SensorFormComponent
 
       this.form.location =
           sensor.location;
+
+      this.form.destinationId =
+          sensor.destinationId ??
+          this.serviceDesign.destinations()
+              .find(destination => destination.name === sensor.location)
+              ?.id ??
+          null;
 
       this.form.type =
           sensor.type;
@@ -569,31 +567,27 @@ export class SensorFormComponent
         | 'Advertencia'
         | 'Alerta' = 'Normal';
 
-    if (
-        this.form.currentValue <
-        Number(this.form.minAlert)
-    ) {
+    const min = Number(this.form.minAlert);
+    const max = Number(this.form.maxAlert);
+    const currentValue = Number(this.form.currentValue);
 
+    if (currentValue < min || currentValue > max) {
       status = 'Alerta';
+    } else {
+      const margin = (max - min) * 0.1;
+
+      if (currentValue <= min + margin || currentValue >= max - margin) {
+        status = 'Advertencia';
+      }
     }
 
-    if (
-        this.form.currentValue >
-        Number(this.form.maxAlert)
-    ) {
+    const destination =
+        this.serviceDesign.destinations()
+            .find(item => item.id === Number(this.form.destinationId));
 
-      status = 'Alerta';
-    }
+    if (!destination) return;
 
-    const history = [
-      this.form.currentValue - 0.2,
-      this.form.currentValue - 0.1,
-      this.form.currentValue,
-      this.form.currentValue + 0.1,
-      this.form.currentValue,
-      this.form.currentValue - 0.1,
-      this.form.currentValue
-    ];
+    const history = this.generateHistory(currentValue);
 
     const sensor = new Sensor({
 
@@ -606,7 +600,10 @@ export class SensorFormComponent
       this.form.name,
 
       location:
-      this.form.location,
+          destination.name,
+
+      destinationId:
+          destination.id,
 
       type:
       this.form.type,
@@ -615,7 +612,7 @@ export class SensorFormComponent
       this.form.unit,
 
       currentValue:
-          Number(this.form.currentValue),
+          currentValue,
 
       status,
 
@@ -623,15 +620,13 @@ export class SensorFormComponent
           new Date().toISOString(),
 
       recommendedRange:
-          `${this.form.minAlert}
-        -
-        ${this.form.maxAlert}`,
+          `${min} - ${max} ${this.form.unit}`,
 
       minAlert:
-          Number(this.form.minAlert),
+          min,
 
       maxAlert:
-          Number(this.form.maxAlert),
+          max,
 
       history
     });
@@ -656,6 +651,25 @@ export class SensorFormComponent
   closeDeleteModal(): void {
 
     this.showDeleteModal = false;
+  }
+
+  private generateHistory(currentValue: number): number[] {
+    const base = Number(currentValue) || 0;
+
+    if (base === 0) {
+      return [0, 0, 0, 0, 0, 0, 0];
+    }
+
+    const variation = base * 0.08;
+
+    return Array.from({ length: 7 }, (_, index) => {
+      if (index === 6) return Number(base.toFixed(2));
+
+      const value =
+          base + (Math.random() * variation * 2 - variation);
+
+      return Number(value.toFixed(2));
+    });
   }
 
   confirmDelete(): void {

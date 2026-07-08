@@ -18,6 +18,7 @@ import {
   TranslateModule,
   TranslateService
 } from '@ngx-translate/core';
+import { AuthenticationService } from '../../../../iam/application/authentication.service';
 
 @Component({
   selector: 'app-layout',
@@ -50,7 +51,7 @@ import {
         [opened]="drawerOpen"
       >
 
-        <mat-nav-list>
+        <mat-nav-list *ngIf="auth.isAuthenticated()">
 
           <a
             mat-list-item
@@ -107,7 +108,7 @@ import {
           <span class="spacer"></span>
 
           <!-- DESKTOP NAV -->
-          <nav class="desktop-nav">
+          <nav class="desktop-nav" *ngIf="auth.isAuthenticated()">
 
             <a
               *ngFor="let item of navItems"
@@ -129,16 +130,19 @@ import {
 
           </nav>
 
+          <div class="auth-controls" *ngIf="auth.currentUser() as user">
+            <span class="welcome-text">
+              {{ 'auth.welcome' | translate }}, {{ user.email }}
+            </span>
+
+            <button mat-button class="sign-out-button" (click)="auth.signOut()">
+              <mat-icon>logout</mat-icon>
+              <span class="sign-out-label">{{ 'auth.signOut' | translate }}</span>
+            </button>
+          </div>
+
           <!-- LANGUAGE SWITCHER -->
           <div class="lang-switcher">
-
-            <button
-              mat-button
-              [class.lang-active]="currentLang === 'es'"
-              (click)="switchLang('es')"
-            >
-              ES
-            </button>
 
             <button
               mat-button
@@ -146,6 +150,14 @@ import {
               (click)="switchLang('en')"
             >
               EN
+            </button>
+
+            <button
+              mat-button
+              [class.lang-active]="currentLang === 'es'"
+              (click)="switchLang('es')"
+            >
+              ES
             </button>
 
           </div>
@@ -293,6 +305,27 @@ import {
       background: white;
     }
 
+    .auth-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 14px;
+      color: white;
+    }
+
+    .welcome-text {
+      max-width: 210px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .sign-out-button {
+      color: white !important;
+    }
+
     .lang-switcher button {
 
       min-width: 52px;
@@ -346,9 +379,13 @@ import {
       margin-right: 8px;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1350px) {
 
       .desktop-nav {
+        display: none;
+      }
+
+      .welcome-text {
         display: none;
       }
 
@@ -362,6 +399,35 @@ import {
 
       .page-container {
         padding: 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .brand-name,
+      .welcome-text,
+      .sign-out-label {
+        display: none;
+      }
+
+      .app-toolbar {
+        padding: 0 12px;
+      }
+
+      .auth-controls {
+        margin-left: 4px;
+      }
+
+      .sign-out-button {
+        min-width: 44px;
+        padding: 0 10px !important;
+      }
+
+      .lang-switcher {
+        margin-left: 6px;
+      }
+
+      .lang-switcher button {
+        min-width: 42px;
       }
     }
   `]
@@ -401,7 +467,8 @@ export class LayoutComponent {
   ];
 
   constructor(
-      private translate: TranslateService
+      private translate: TranslateService,
+      public auth: AuthenticationService
   ) {
 
     this.translate.setDefaultLang('en');

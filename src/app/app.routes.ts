@@ -1,9 +1,16 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './iam/infrastructure/auth.guard';
 
 export const routes: Routes = [
+  {
+    path: 'iam',
+    loadChildren: () =>
+      import('./iam/iam.routes').then(m => m.iamRoutes)
+  },
 
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadChildren: () =>
         import('./dashboard/dashboard.routes')
             .then(m => m.dashboardRoutes)
@@ -11,6 +18,7 @@ export const routes: Routes = [
 
   {
     path: 'devices',
+    canActivate: [authGuard],
     loadChildren: () =>
         import('./devices/devices.routes')
             .then(m => m.devicesRoutes)
@@ -18,6 +26,7 @@ export const routes: Routes = [
 
   {
     path: 'monitoring',
+    canActivate: [authGuard],
     loadChildren: () =>
         import('./monitoring/monitoring.routes')
             .then(m => m.monitoringRoutes)
@@ -25,6 +34,7 @@ export const routes: Routes = [
 
   {
     path: 'subscription',
+    canActivate: [authGuard],
     loadChildren: () =>
         import('./subscriptions/subscriptions.routes')
             .then(m => m.subscriptionsRoutes)
@@ -32,6 +42,7 @@ export const routes: Routes = [
 
   {
     path: 'service-design',
+    canActivate: [authGuard],
     loadChildren: () =>
         import('./service-design/service-design.routes')
             .then(m => m.serviceDesignRoutes)

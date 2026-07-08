@@ -8,10 +8,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 import { TranslateModule } from '@ngx-translate/core';
 
 import { MonitoringService } from '../../../../monitoring/application/monitoring.service';
+import { QualityAnalysisService } from '../../../application/quality-analysis.service';
 
 @Component({
   selector: 'app-dashboard-view',
@@ -20,6 +26,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
   imports: [
     CommonModule,
+    FormsModule,
 
     MatCardModule,
     MatButtonModule,
@@ -27,6 +34,10 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
 
     TranslateModule
   ],
@@ -56,9 +67,9 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
           <mat-card-content>
 
-            <div class="kpi-icon blue-bg">
+            <div class="kpi-icon primary-bg">
 
-              <mat-icon class="blue-icon">
+              <mat-icon class="primary-icon">
                 sensors
               </mat-icon>
 
@@ -112,10 +123,10 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
           <mat-card-content>
 
-            <div class="kpi-icon green-bg">
+            <div class="kpi-icon primary-bg">
 
-              <mat-icon class="green-icon">
-                water_drop
+              <mat-icon class="primary-icon">
+                monitoring
               </mat-icon>
 
             </div>
@@ -123,11 +134,11 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
             <div>
 
               <p class="kpi-label">
-                {{ 'dashboard.treatedVolume' | translate }}
+                {{ 'dashboard.qualityAnalyses' | translate }}
               </p>
 
-              <p class="kpi-value success-text">
-                1,240 m³
+              <p class="kpi-value">
+                {{ totalQualityFindings }}
               </p>
 
             </div>
@@ -140,10 +151,13 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
           <mat-card-content>
 
-            <div class="kpi-icon green-bg">
+            <div
+              class="kpi-icon"
+              [ngClass]="contaminationPredictions > 0 ? 'red-bg' : 'primary-bg'"
+            >
 
-              <mat-icon class="green-icon">
-                trending_up
+              <mat-icon [ngClass]="contaminationPredictions > 0 ? 'red-icon' : 'primary-icon'">
+                report
               </mat-icon>
 
             </div>
@@ -151,11 +165,14 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
             <div>
 
               <p class="kpi-label">
-                {{ 'dashboard.efficiency' | translate }}
+                {{ 'dashboard.contaminationPredictions' | translate }}
               </p>
 
-              <p class="kpi-value success-text">
-                98.2%
+              <p
+                class="kpi-value"
+                [ngClass]="contaminationPredictions > 0 ? 'danger-text' : 'success-text'"
+              >
+                {{ contaminationPredictions }}
               </p>
 
             </div>
@@ -190,6 +207,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
               mat-flat-button
               color="primary"
               type="button"
+              (click)="showQualityForm = true"
             >
               <mat-icon>add</mat-icon>
               {{ 'dashboard.registerQualityFinding' | translate }}
@@ -255,6 +273,53 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
       </mat-card>
 
+      <div class="quality-modal" *ngIf="showQualityForm">
+        <mat-card class="quality-form-card">
+          <mat-card-content>
+            <div class="modal-header">
+              <h2>{{ 'dashboard.registerQualityFinding' | translate }}</h2>
+              <button mat-icon-button type="button" (click)="showQualityForm = false">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'dashboard.sourceDevice' | translate }}</mat-label>
+              <mat-select [(ngModel)]="qualityForm.sensorSourceId">
+                <mat-option *ngFor="let sensor of store.sensors()" [value]="sensor.id">
+                  {{ sensor.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'dashboard.evaluatedParameter' | translate }}</mat-label>
+              <mat-select [(ngModel)]="qualityForm.detectedParameters">
+                <mat-option *ngFor="let parameter of qualityParameters" [value]="parameter">
+                  {{ parameter }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'dashboard.severity' | translate }} (0-10)</mat-label>
+              <input matInput type="number" min="0" max="10" step="0.1"
+                     [(ngModel)]="qualityForm.severityScore">
+            </mat-form-field>
+
+            <div class="modal-actions">
+              <button mat-button type="button" (click)="showQualityForm = false">
+                {{ 'option.cancel' | translate }}
+              </button>
+              <button mat-flat-button color="primary" type="button" (click)="registerQualityFinding()">
+                <mat-icon>check</mat-icon>
+                {{ 'dashboard.registerQualityFinding' | translate }}
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
       <!-- MAIN GRID -->
 
       <div class="dashboard-layout">
@@ -272,7 +337,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
             <button
                 mat-button
                 color="primary"
-                (click)="router.navigate(['/monitoring/sensors'])"
+                (click)="router.navigate(['/devices'])"
             >
               {{ 'dashboard.viewFullMap' | translate }}
             </button>
@@ -319,7 +384,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                     class="status-chip"
                     [ngClass]="getStatusChipClass(sensor.status)"
                   >
-                    {{ sensor.status }}
+                    {{ store.sensorStatusLabel(sensor.status) }}
                   </span>
 
                 </td>
@@ -437,7 +502,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                 <div class="flex-1">
 
                   <p class="alert-title">
-                    {{ alert.message }}
+                    {{ store.alertMessage(alert) }}
                   </p>
 
                   <p class="text-sm text-muted">
@@ -460,7 +525,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                       : 'chip-warning'
                   "
                 >
-                  {{ alert.severity }}
+                  {{ store.alertSeverityLabel(alert) }}
                 </span>
 
               </div>
@@ -481,7 +546,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
               <div class="plan-box">
 
-                <mat-icon class="blue-icon">
+                <mat-icon class="primary-icon">
                   workspace_premium
                 </mat-icon>
 
@@ -509,7 +574,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
                     color="primary"
                     (click)="
                       router.navigate([
-                        '/monitoring/subscription'
+                        '/subscription'
                       ])
                     "
                   >
@@ -583,7 +648,7 @@ styles: [`
       height: 30px;
     }
 
-    .blue-bg {
+    .primary-bg {
       background: #d1fae5;
     }
 
@@ -595,7 +660,7 @@ styles: [`
       background: #dcfce7;
     }
 
-    .blue-icon {
+    .primary-icon {
       color: #10B981;
     }
 
@@ -670,6 +735,41 @@ styles: [`
     .quality-table-wrapper table {
       min-width: 820px;
       margin-top: 0;
+    }
+
+    .quality-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .quality-form-card {
+      width: min(520px, 100%);
+    }
+
+    .quality-form-card mat-form-field {
+      display: block;
+      width: 100%;
+    }
+
+    .modal-header,
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-header {
+      margin-bottom: 18px;
+    }
+
+    .modal-actions {
+      justify-content: flex-end;
     }
 
     .monitoring-card {
@@ -832,35 +932,44 @@ styles: [`
   
 export class DashboardViewComponent implements OnInit {
 
-  qualityFindings = [
-    {
-      sourceDevice: 'SENSOR-03 #3',
-      parameter: 'Chlorine',
-      severityScore: 8.7,
-      reviewStatus: 'Confirmed',
-      riskDetected: true,
-      createdAt: '07/07/2026 09:40'
-    },
-    {
-      sourceDevice: 'SENSOR-02 #2',
-      parameter: 'Turbidity',
-      severityScore: 6.2,
-      reviewStatus: 'Evaluated',
-      riskDetected: false,
-      createdAt: '07/07/2026 08:15'
-    },
-    {
-      sourceDevice: 'SENSOR-01 #1',
-      parameter: 'PH',
-      severityScore: 3.4,
-      reviewStatus: 'Dismissed',
-      riskDetected: false,
-      createdAt: '06/07/2026 18:05'
-    }
+  showQualityForm = false;
+  qualityParameters = [
+    'PH', 'TURBIDITY', 'PRESSURE', 'LEVEL',
+    'CHLORINE', 'FLOW', 'DISSOLVED_OXYGEN', 'TEMPERATURE'
   ];
+  qualityForm = {
+    sensorSourceId: null as number | null,
+    detectedParameters: 'PH',
+    severityScore: 0
+  };
+
+  get qualityFindings() {
+    return this.qualityService.analyses().map(analysis => {
+      const sensor = this.store.getSensorById(analysis.sensorSourceId);
+      return {
+        sourceDevice: sensor?.name ?? `#${analysis.sensorSourceId}`,
+        parameter: analysis.detectedParameters,
+        severityScore: Number(analysis.severityScore),
+        reviewStatus: analysis.anomalyStatus,
+        riskDetected: analysis.hasContaminationPeakPrediction,
+        createdAt: new Date(analysis.createdAt).toLocaleString()
+      };
+    });
+  }
+
+  get totalQualityFindings(): number {
+    return this.qualityFindings.length;
+  }
+
+  get contaminationPredictions(): number {
+    return this.qualityFindings
+        .filter(finding => finding.riskDetected)
+        .length;
+  }
 
   constructor(
       public store: MonitoringService,
+      public qualityService: QualityAnalysisService,
       public router: Router
   ) {}
 
@@ -877,6 +986,26 @@ export class DashboardViewComponent implements OnInit {
     if (!this.store.subscriptionLoaded()) {
       this.store.fetchSubscription();
     }
+
+    if (!this.qualityService.loaded()) {
+      this.qualityService.fetchAll();
+    }
+  }
+
+  registerQualityFinding(): void {
+    if (!this.qualityForm.sensorSourceId) return;
+    const severity = Math.min(10, Math.max(0, Number(this.qualityForm.severityScore)));
+    this.qualityService.create(
+      this.qualityForm.sensorSourceId,
+      this.qualityForm.detectedParameters,
+      severity
+    );
+    this.showQualityForm = false;
+    this.qualityForm = {
+      sensorSourceId: null,
+      detectedParameters: 'PH',
+      severityScore: 0
+    };
   }
 
   getStatusChipClass(status: string): string {
