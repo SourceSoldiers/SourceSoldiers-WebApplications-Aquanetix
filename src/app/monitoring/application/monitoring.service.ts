@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../environments/environment';
 import { AuthenticationService } from '../../iam/application/authentication.service';
@@ -152,6 +152,14 @@ export class MonitoringService {
     };
 
     this.http.post<DeviceResource>(`${environment.apiUrl}/devices`, createPayload).pipe(
+      tap(device => {
+        const created = new Sensor({
+          ...sensor,
+          id: device.id,
+          lastUpdated: device.lastTelemetrySync
+        });
+        this.sensors.update(items => [...items, created]);
+      }),
       switchMap(device => this.saveThreshold(device.id, sensor).pipe(
         switchMap(threshold => this.http.put<DeviceResource>(
           `${environment.apiUrl}/devices/${device.id}`,
@@ -161,7 +169,9 @@ export class MonitoringService {
     ).subscribe({
       next: ({ updated, threshold }) => {
         const entity = this.toSensor(updated, threshold);
-        this.sensors.update(items => [...items, entity]);
+        this.sensors.update(items =>
+          items.map(item => item.id === entity.id ? entity : item)
+        );
         this.syncAutomaticAlert(entity);
       },
       error: error => this.recordError(error)
