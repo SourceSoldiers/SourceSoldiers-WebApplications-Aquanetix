@@ -953,13 +953,14 @@ export class DashboardViewComponent implements OnInit {
     return this.qualityService.analyses()
       .filter(analysis => ownedDeviceIds.has(analysis.sensorSourceId))
       .map(analysis => {
+      const severityScore = Math.min(10, Math.max(0, Number(analysis.severityScore)));
       const sensor = this.store.getSensorById(analysis.sensorSourceId);
       return {
         sourceDevice: sensor?.name ?? `#${analysis.sensorSourceId}`,
         parameter: analysis.detectedParameters,
-        severityScore: Number(analysis.severityScore),
+        severityScore,
         reviewStatus: analysis.anomalyStatus,
-        riskDetected: analysis.hasContaminationPeakPrediction,
+        riskDetected: severityScore >= 8,
         createdAt: new Date(analysis.createdAt).toLocaleString()
         };
       });

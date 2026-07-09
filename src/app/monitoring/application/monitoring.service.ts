@@ -86,9 +86,8 @@ export class MonitoringService {
   readonly subscriptionLoaded = signal(false);
   readonly plansLoaded = signal(false);
 
-  readonly activeSensorsCount = computed(() =>
-    this.sensors().filter(sensor => sensor.status !== 'Alerta').length
-  );
+  readonly activeSensorsCount = computed(() => this.sensors().length);
+  readonly connectedDevicesCount = computed(() => this.sensors().length);
   readonly criticalAlertsCount = computed(() =>
     this.alerts().filter(alert =>
       alert.severity === 'Crítica' && alert.status === 'Activa'
@@ -255,11 +254,13 @@ export class MonitoringService {
     });
   }
 
-  fetchSubscription(): void {
+  fetchSubscription(showLoading = true): void {
     const userId = this.auth.currentUser()?.id;
     if (!userId) return;
 
-    this.subscriptionLoaded.set(false);
+    if (showLoading) {
+      this.subscriptionLoaded.set(false);
+    }
     this.http.get<SubscriptionResource>(
       `${environment.apiUrl}/subscriptions/by-user/${userId}`
     ).subscribe({
@@ -303,6 +304,32 @@ export class MonitoringService {
     this.http.put<SubscriptionResource>(
       `${environment.apiUrl}/subscriptions/${current.id}/plan`,
       { newPlan: plan }
+    ).subscribe({
+      next: resource => this.subscription.set(this.toSubscription(resource)),
+      error: error => this.recordError(error)
+    });
+  }
+
+  cancelSubscription(): void {
+    const current = this.subscription();
+    if (!current) return;
+
+    this.http.put<SubscriptionResource>(
+      `${environment.apiUrl}/subscriptions/${current.id}/cancel`,
+      {}
+    ).subscribe({
+      next: resource => this.subscription.set(this.toSubscription(resource)),
+      error: error => this.recordError(error)
+    });
+  }
+
+  renewSubscription(): void {
+    const current = this.subscription();
+    if (!current) return;
+
+    this.http.put<SubscriptionResource>(
+      `${environment.apiUrl}/subscriptions/${current.id}/renew`,
+      {}
     ).subscribe({
       next: resource => this.subscription.set(this.toSubscription(resource)),
       error: error => this.recordError(error)
@@ -366,7 +393,12 @@ export class MonitoringService {
         minValue: sensor.minAlert,
         maxValue: sensor.maxAlert,
         unit: sensor.unit,
-        alertLevel: sensor.status === 'Alerta' ? 'Critical' : 'Warning'
+        alertLevel:
+          sensor.status === 'Alerta'
+            ? 'Critical'
+            : sensor.status === 'Advertencia'
+              ? 'Warning'
+              : 'Normal'
       }
     );
   }

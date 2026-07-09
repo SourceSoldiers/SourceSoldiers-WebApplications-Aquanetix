@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -57,6 +57,19 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
           <mat-card class="plan-card">
 
             <mat-card-content>
+
+              <span
+                class="subscription-status"
+                [class.status-cancelled]="isCancelled"
+              >
+                {{
+                  (
+                    isCancelled
+                      ? 'subscription.statusCancelled'
+                      : 'subscription.statusRenewed'
+                  ) | translate
+                }}
+              </span>
 
               <div class="current-badge">
                 {{ 'subscription.currentPlan' | translate }}
@@ -143,9 +156,18 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
                 <button
                   mat-button
-                  class="cancel-btn">
+                  class="cancel-btn"
+                  [class.renew-btn]="isCancelled"
+                  (click)="toggleSubscriptionStatus()">
 
-                  {{ 'subscription.cancelSubscription' | translate }}
+                  <mat-icon>{{ isCancelled ? 'autorenew' : 'cancel' }}</mat-icon>
+                  {{
+                    (
+                      isCancelled
+                        ? 'subscription.renewSubscription'
+                        : 'subscription.cancelSubscription'
+                    ) | translate
+                  }}
                 </button>
               </div>
             </mat-card-content>
@@ -171,8 +193,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
                     <strong>
                       {{
-                        store.subscription()!
-                        .usage.sensorsConnected
+                        store.connectedDevicesCount()
                       }}
                       /
                       {{
@@ -189,8 +210,7 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
 
                       [style.width.%]="
                         usagePercent(
-                          store.subscription()!
-                          .usage.sensorsConnected,
+                          store.connectedDevicesCount(),
 
                           store.subscription()!
                           .usage.sensorsLimit
@@ -428,7 +448,26 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
 
     .plan-card {
+      position: relative;
       border-top: 4px solid #10B981;
+    }
+
+    .subscription-status {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: #047857;
+      background: #d1fae5;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .subscription-status.status-cancelled {
+      color: #b91c1c;
+      background: #fee2e2;
     }
 
     .plan-card mat-card-content {
@@ -585,6 +624,10 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
       font-weight: 600;
     }
 
+    .renew-btn {
+      color: #047857 !important;
+    }
+
     .right-column {
 
       display: flex;
@@ -728,18 +771,45 @@ import { MonitoringService } from '../../../../monitoring/application/monitoring
     }
   `]
 })
-export class SubscriptionViewComponent implements OnInit {
+export class SubscriptionViewComponent implements OnInit, OnDestroy {
+  private refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
       public store: MonitoringService
   ) {}
 
   ngOnInit(): void {
+    if (!this.store.sensorsLoaded()) {
+      this.store.fetchSensors();
+    }
 
     if (!this.store.subscriptionLoaded()) {
 
       this.store.fetchSubscription();
     }
+
+    this.refreshTimer = setInterval(
+      () => this.store.fetchSubscription(false),
+      10000
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+  }
+
+  get isCancelled(): boolean {
+    return this.store.subscription()?.status.toLowerCase().startsWith('cancel') ?? false;
+  }
+
+  toggleSubscriptionStatus(): void {
+    if (this.isCancelled) {
+      this.store.renewSubscription();
+      return;
+    }
+    this.store.cancelSubscription();
   }
 
   usagePercent(
@@ -747,8 +817,7 @@ export class SubscriptionViewComponent implements OnInit {
       limit: number
   ): number {
 
-    return Math.round(
-        (used / limit) * 100
-    );
+    if (limit <= 0) return 0;
+    return Math.min(100, Math.round((used / limit) * 100));
   }
 }

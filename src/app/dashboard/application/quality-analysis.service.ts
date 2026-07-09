@@ -25,7 +25,7 @@ export class QualityAnalysisService {
     this.loaded.set(false);
     this.http.get<QualityAnalysis[]>(`${environment.apiUrl}/quality-analysis`).subscribe({
       next: analyses => {
-        this.analyses.set(analyses);
+        this.analyses.set(analyses.map(analysis => this.normalize(analysis)));
         this.loaded.set(true);
       },
       error: error => this.handleError(error)
@@ -39,7 +39,7 @@ export class QualityAnalysisService {
       detectedParameters,
       severityScore
     }).subscribe({
-      next: created => this.analyses.update(items => [created, ...items]),
+      next: created => this.analyses.update(items => [this.normalize(created), ...items]),
       error: error => this.handleError(error)
     });
   }
@@ -53,5 +53,14 @@ export class QualityAnalysisService {
       'The request could not be completed.'
     );
     this.loaded.set(true);
+  }
+
+  private normalize(analysis: QualityAnalysis): QualityAnalysis {
+    const severityScore = Math.min(10, Math.max(0, Number(analysis.severityScore)));
+    return {
+      ...analysis,
+      severityScore,
+      hasContaminationPeakPrediction: severityScore >= 8
+    };
   }
 }
